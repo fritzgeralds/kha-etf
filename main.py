@@ -25,10 +25,10 @@ parser.add_argument('-r', help='Search recursively for files matching pattern. D
 args = parser.parse_args()
 
 if args.input:
-    input = args.input
+    indir = args.input
 
 if args.output:
-    output = args.output
+    outdir = args.output
 
 if args.pattern:
     pattern = args.pattern
@@ -51,12 +51,13 @@ def process(event):
         sys.stdout.flush()
         sleep(1)
     try:
-        shutil.copy(event.src_path, output + "\\" + ((event.src_path.split('\\')[-1]).split('.')[0]) + '.txt')
-        print(output + "\\" + ((event.src_path.split('\\')[-1]).split('.')[0]) + '.txt')
+        shutil.copy(event.src_path, outdir + "\\" + ((event.src_path.split('\\')[-1]).split('.')[0]) + '.txt')
     except IOError as e:
         print('Unable to copy file. {}'.format(e))
+        sendmail(subject=f'Conversion failure: {}'.format(event.src_path.split('\\')[-1], body=e))
     except:
         print('Unexpected error:', sys.exc_info()[0])
+        sendmail(subject=f'Unexpected error: {}'.format(event.src_path.split('\\')[-1], body=sys.exc_info()[0]))
     print("Conversion complete. Submitting to KBH.\n")
 
 
@@ -70,15 +71,15 @@ class MyHandler(PatternMatchingEventHandler):
 
 if __name__ == '__main__':
     print("Starting Watchdog Server...")
-    print(" - Watching directory: " + input)
-    print(" - Saving TXT files to: " + output)
+    print(" - Watching directory: " + indir)
+    print(" - Saving TXT files to: " + outdir)
     print(" - Pattern: " + pattern)
     print(" - Timeout: " + str(timeout))
     print(" - Recursive: " + str(recursive))
 
     event_handler = MyHandler()
     observer = Observer()
-    observer.schedule(event_handler, input, recursive=recursive)
+    observer.schedule(event_handler, indir, recursive=recursive)
     observer.start()
     try:
         while True:
