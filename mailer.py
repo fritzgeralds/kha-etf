@@ -12,11 +12,11 @@ class Mailer:
     def __init__(self, receivers, subject, body):
         dotenv_path = join(dirname(__file__), '.env')
         load_dotenv(dotenv_path)
-        self.sender = f"{os.getenv('SENDER_NAME')} <{os.getenv('SENDER_EMAIL')}>"
+        self.sender = f"{os.getenv('SENDER_NAME')} <{os.getenv('SENDER_EMAIL')}>" if os.getenv('SENDER_EMAIL') else None
         self.receivers = receivers
         self.subject = subject
         self.body = body
-        self.server = os.getenv('SMTP_SERVER')
+        self.server = os.getenv('SMTP_SERVER') if os.getenv('SMTP_SERVER') else None
 
     def send(self):
         msg = MIMEMultipart()
