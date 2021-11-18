@@ -46,7 +46,7 @@ def process(event):
     sys.stdout.write('\r' + 'Converting {} to TXT format.'.format(event.src_path.split('\\')[-1]))
     sys.stdout.flush()
     sleep(1)
-    for i in range(0,3):
+    for i in range(0, 3):
         sys.stdout.write('.')
         sys.stdout.flush()
         sleep(1)
@@ -54,10 +54,10 @@ def process(event):
         shutil.copy(event.src_path, outdir + "\\" + ((event.src_path.split('\\')[-1]).split('.')[0]) + '.txt')
     except IOError as e:
         print('Unable to copy file. {}'.format(e))
-        sendmail(subject=f'Conversion failure: {}'.format(event.src_path.split('\\')[-1], body=e))
-    except:
+        sendmail(subject='Conversion failure: {}'.format(event.src_path.split('\\')[-1], body=e))
+    except Exception as e:
         print('Unexpected error:', sys.exc_info()[0])
-        sendmail(subject=f'Unexpected error: {}'.format(event.src_path.split('\\')[-1], body=sys.exc_info()[0]))
+        sendmail(subject='Unexpected error: {}'.format(event.src_path.split('\\')[-1], body=e))
     print("Conversion complete. Submitting to KBH.\n")
 
 
