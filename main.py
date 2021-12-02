@@ -7,6 +7,8 @@ import argparse
 import os
 import shutil
 from mailer import sendmail
+import csv
+from models import getCSV
 
 parser = argparse.ArgumentParser(description='ETF Watchdog')
 parser.add_argument('-i', help='Directory to watch for new files. Default is current directory.',
@@ -44,21 +46,64 @@ else:
 
 def process(event):
     sys.stdout.write('\r' + 'Converting {} to TXT format.'.format(event.src_path.split('\\')[-1]))
-    sys.stdout.flush()
-    sleep(1)
-    for i in range(0, 3):
-        sys.stdout.write('.')
-        sys.stdout.flush()
-        sleep(1)
-    try:
-        shutil.copy(event.src_path, outdir + "\\" + ((event.src_path.split('\\')[-1]).split('.')[0]) + '.txt')
-    except IOError as e:
-        print('Unable to copy file. {}'.format(e))
-        sendmail(subject='Conversion failure: {}'.format(event.src_path.split('\\')[-1], body=e))
-    except Exception as e:
-        print('Unexpected error:', sys.exc_info()[0])
-        sendmail(subject='Unexpected error: {}'.format(event.src_path.split('\\')[-1], body=e))
-    print("Conversion complete. Submitting to KBH.\n")
+    for file in os.listdir(indir):
+        if file.endswith('.csv'):
+            sys.stdout.write('\r' + 'Converting {} to TXT format.'.format(file))
+            filename = file.split('.')[0]
+            ext = file.split('.')[1]
+            copy = 1
+            while True:
+                if os.path.exists(outdir + '\\' + filename + '.txt'):
+                    filename = filename + '_' + str(copy)
+                    copy += 1
+                else:
+                    break
+            getCSV(indir + '\\' + file)
+
+            shutil.copy(indir + '\\' + file, outdir + '\\' + filename + '.txt')
+
+            filename = file.split('.')[0]
+            if '{}'.format(file) in os.listdir(outdir):
+                print('\nFile already exists. Skipping.')
+            else:
+                with open(os.path.join(indir, file), 'r') as csvfile:
+                    reader = csv.reader(csvfile)
+                    with open(os.path.join(outdir, file.split('.')[0] + '.txt'), 'w') as txtfile:
+                        for row in reader:
+                            txtfile.write('{}\n'.format(row[0]))
+    sys.stdout.write('\r' + 'Converting {} to TXT format.'.format(event.src_path.split('\\')[-1]))
+    print('\nConversion complete.')
+
+
+
+
+
+    #         with open(os.path.join(indir, file), 'r', newline='\n') as csvfile:
+    #             reader = csv.reader(csvfile, delimiter=',')
+    #             line = 0
+    #             with open(os.path.join(outdir, file.split('.')[0] + '.txt'), 'w') as f:
+    #                 for row in reader:
+    #                     if line == 0:
+    #                         line += 1
+    #                         continue
+    #                     else:
+    #                         f.write('|'.join(row[1:]) + '\n')
+    #                         line += 1
+    #         shutil.move(os.path.join(indir, file), os.path.join('./processed', file))
+    # sys.stdout.flush()
+    # sleep(1)
+    # sys.stdout.write('...Done!\n')
+    # sys.stdout.flush()
+    # sleep(1)
+    # # try:
+    # #     shutil.copy(event.src_path, outdir + "\\" + ((event.src_path.split('\\')[-1]).split('.')[0]) + '.txt')
+    # # except IOError as e:
+    # #     print('Unable to copy file. {}'.format(e))
+    # #     sendmail(subject='Conversion failure: {}'.format(event.src_path.split('\\')[-1], body=e))
+    # # except Exception as e:
+    # #     print('Unexpected error:', sys.exc_info()[0])
+    # #     sendmail(subject='Unexpected error: {}'.format(event.src_path.split('\\')[-1], body=e))
+    # print("Conversion complete. Submitting to KBH.\n")
 
 
 class MyHandler(PatternMatchingEventHandler):
