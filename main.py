@@ -7,8 +7,8 @@ from watchdog.events import PatternMatchingEventHandler
 import argparse
 import os
 import shutil
-from models import GetCSV
-from config import Config
+from app.models import GetCSV
+from app.config import Config
 # from mailer import sendmail ## for future failure alert email
 
 cfg = Config()
@@ -111,6 +111,7 @@ class MyHandler(PatternMatchingEventHandler):
 
     def on_created(self, event):
         print("New file \"{}\" has been created.".format(event.src_path.split('\\')[-1]))
+        sleep(1)
         process(event, event.src_path)
 
 

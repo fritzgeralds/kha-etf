@@ -41,11 +41,20 @@ class GetCSV(object):
             for j in range(len(self.headers)):
                 row[self.headers[j]] = i[j]
             row['Date Created Time'] = (dt.datetime.strptime(row['Date Created Time'], '%m/%d/%Y %H:%M')).strftime(
-                '%m-%d-%Y %I:%M:%S %p')
+                                        '%m-%d-%Y %I:%M:%S %p')
+            if row['NEXT VISITSCHEDULED'] != '':
+                row['NEXT VISITSCHEDULED'] = (dt.datetime.strptime(row['NEXT VISITSCHEDULED'],
+                                               '%m/%d/%Y')).strftime('%m-%d-%Y')
+            if row['Project Start Date'] != '':
+                row['Project Start Date'] = (dt.datetime.strptime(row['Project Start Date'], '%m/%d/%Y')).strftime(
+                                              '%m-%d-%Y')
+            if row['Project Exit Date'] != '':
+                row['Project Exit Date'] = (dt.datetime.strptime(row['Project Exit Date'],
+                                               '%m/%d/%Y')).strftime('%m-%d-%Y')
             rows.append(
                 '{0:04}'.format(counter) +
                 f"|{row['Date Created Time']}|1|{row['KHS ID']}|{row['CIN']}|"
-                f"{row['Member Next Visit Scheduled?']}|{row['NEXT VISITSCHEDULED']}|{row['Contact Role']}|"
+                f"{'1' if row['Member Next Visit Scheduled?'] == 'Yes' else '0'}|{row['NEXT VISITSCHEDULED']}|{row['Contact Role']}|"
                 f"{row['Contact Role Other']}|{row['Project Start Date']}|{row['Project Start Date']}|"
                 f"{row['Project Exit Date']}|{row['Enrollment Flag']}|"
                 f"SITE_TIN|SITE_NPI|PROGRAM_NAME||||")

@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 class Mailer:
     def __init__(self, receivers, subject, body):
-        dotenv_path = join(dirname(__file__), '.env')
+        dotenv_path = join(dirname(__file__), '../.env')
         load_dotenv(dotenv_path)
         self.sender = f"{os.getenv('SENDER_NAME')} <{os.getenv('SENDER_EMAIL')}>" if os.getenv('SENDER_EMAIL') else None
         self.receivers = receivers
