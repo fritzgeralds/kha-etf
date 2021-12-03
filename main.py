@@ -53,59 +53,56 @@ if not os.path.exists(outdir):
         os.makedirs(indir + '\\processed')
 
 
-def process(event):
-    for file in os.listdir(indir):
-        if file.endswith('.csv'):
-            sys.stdout.write('\r' + 'Converting {} to TXT format.'.format(file))
-            copy = 1
-
-            try:
-                conversion = GetCSV(indir + '\\' + file)
-                if 'Enrollment ID' in conversion.headers[1]:
-                    filename = 'HOUSINGAUTH24STCSS_KHS_CSS_ENROLLMENT_' + env + '_' + \
-                               datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-                    while True:
-                        if os.path.exists(outdir + '\\' + filename + '.txt'):
-                            filename = filename + '_' + str(copy)
-                            copy += 1
-                        else:
-                            break
-                    with open(outdir + '\\' + filename + '.txt', 'w') as f:
-                        rows = conversion.get_row_enrollment()
-                        for row in rows:
-                            f.write(row + '\n')
-                elif 'General ID' in conversion.headers[1]:
-                    filename = 'HOUSINGAUTH24STCSS_KHS_CSS_DEMOGRAPHICS_' + env + '_' + \
-                               datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-                    while True:
-                        if os.path.exists(outdir + '\\' + filename + '.txt'):
-                            filename = filename + '_' + str(copy)
-                            copy += 1
-                        else:
-                            break
-                    with open(outdir + '\\' + filename + '.txt', 'w') as f:
-                        rows = conversion.get_row_demographics()
-                        for row in rows:
-                            f.write(row + '\n')
-                elif 'Outreach' in conversion.headers[1]:
-                    filename = 'HOUSINGAUTH24STCSS_KHS_CSS_OUTREACH_' + env + '_' + \
-                               datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-                    while True:
-                        if os.path.exists(outdir + '\\' + filename + '.txt'):
-                            filename = filename + '_' + str(copy)
-                            copy += 1
-                        else:
-                            break
-                    with open(outdir + '\\' + filename + '.txt', 'w') as f:
-                        rows = conversion.get_row_outreach()
-                        for row in rows:
-                            f.write(row + '\n')
-                else:
-                    break
-                shutil.move(os.path.join(indir, file), os.path.join(indir + '\\processed', file))
-            except Exception as e:
-                print(e)
-                break
+def process(event, file):
+    if file.endswith('.csv'):
+        sys.stdout.write('\r' + 'Converting {} to TXT format.'.format(file))
+        copy = 1
+        try:
+            conversion = GetCSV(file)
+            if 'Enrollment ID' in conversion.headers[1]:
+                filename = 'HOUSINGAUTH24STCSS_KHS_CSS_ENROLLMENT_' + env + '_' + \
+                           datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
+                while True:
+                    if os.path.exists(outdir + '\\' + filename + '.txt'):
+                        filename = filename + '_' + str(copy)
+                        copy += 1
+                    else:
+                        break
+                with open(outdir + '\\' + filename + '.txt', 'w') as f:
+                    rows = conversion.get_row_enrollment()
+                    for row in rows:
+                        f.write(row + '\n')
+            elif 'General ID' in conversion.headers[1]:
+                filename = 'HOUSINGAUTH24STCSS_KHS_CSS_DEMOGRAPHICS_' + env + '_' + \
+                           datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
+                while True:
+                    if os.path.exists(outdir + '\\' + filename + '.txt'):
+                        filename = filename + '_' + str(copy)
+                        copy += 1
+                    else:
+                        break
+                with open(outdir + '\\' + filename + '.txt', 'w') as f:
+                    rows = conversion.get_row_demographics()
+                    for row in rows:
+                        f.write(row + '\n')
+            elif 'Outreach' in conversion.headers[1]:
+                filename = 'HOUSINGAUTH24STCSS_KHS_CSS_OUTREACH_' + env + '_' + \
+                           datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
+                while True:
+                    if os.path.exists(outdir + '\\' + filename + '.txt'):
+                        filename = filename + '_' + str(copy)
+                        copy += 1
+                    else:
+                        break
+                with open(outdir + '\\' + filename + '.txt', 'w') as f:
+                    rows = conversion.get_row_outreach()
+                    for row in rows:
+                        f.write(row + '\n')
+            else:
+                print('\n' + 'Error: File {} does not contain a valid header.'.format(file.split('\\')[-1]))
+            shutil.move(os.path.join(indir, file.split('\\')[-1]), os.path.join(indir + '\\processed', file.split('\\')[-1]))
+        except Exception as e:
+            print(e)
     print('\nConversion complete.')
 
 
@@ -114,7 +111,7 @@ class MyHandler(PatternMatchingEventHandler):
 
     def on_created(self, event):
         print("New file \"{}\" has been created.".format(event.src_path.split('\\')[-1]))
-        process(event)
+        process(event, event.src_path)
 
 
 if __name__ == '__main__':
