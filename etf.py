@@ -59,7 +59,7 @@ def process(event, file):
         copy = 1
         try:
             conversion = GetCSV(file)
-            if 'Enrollment ID' in conversion.headers[1]:
+            if 'Enrollment ID' in conversion.headers:
                 filename = 'HOUSINGAUTH24STCSS_KHS_CSS_ENROLLMENT_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
                 while True:
@@ -72,7 +72,7 @@ def process(event, file):
                     rows = conversion.get_row_enrollment()
                     for row in rows:
                         f.write(row + '\n')
-            elif 'General ID' in conversion.headers[1]:
+            elif 'General ID' in conversion.headers:
                 filename = 'HOUSINGAUTH24STCSS_KHS_CSS_DEMOGRAPHICS_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
                 while True:
@@ -85,7 +85,7 @@ def process(event, file):
                     rows = conversion.get_row_demographics()
                     for row in rows:
                         f.write(row + '\n')
-            elif 'Outreach' in conversion.headers[1]:
+            elif 'Assessment ID' in conversion.headers:
                 filename = 'HOUSINGAUTH24STCSS_KHS_CSS_OUTREACH_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
                 while True:
