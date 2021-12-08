@@ -85,7 +85,7 @@ class GetCSV(object):
                 row[self.headers[j]] = i[j]
             row['Date Created Time'] = (dt.datetime.strptime(row['Date Created Time'], '%m/%d/%Y %H:%M')).strftime(
                                         '%m-%d-%Y %I:%M:%S %p')
-            if row['NEXT VISITSCHEDULED'] != ''
+            if row['NEXT VISITSCHEDULED'] != '':
                 row['NEXT VISITSCHEDULED'] = (dt.datetime.strptime(row['NEXT VISITSCHEDULED'],
                                                '%m/%d/%Y')).strftime('%m-%d-%Y')
             if row['Project Start Date'] != '':
