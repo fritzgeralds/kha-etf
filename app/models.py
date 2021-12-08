@@ -62,7 +62,7 @@ class GetCSV(object):
             for j in range(len(self.headers)):
                 row[self.headers[j]] = i[j]
             row['Date Created Time'] = (dt.datetime.strptime(row['Date Created Time'], '%m/%d/%Y %H:%M')).strftime(
-                '%m-%d-%Y %I:%M:%S %p')
+                '%m-%d-%Y %H:%M:%S')
             row['Date of Birth Date'] = (dt.datetime.strptime(row['Date of Birth Date'],
                                                               '%m/%d/%Y')).strftime('%m-%d-%Y')
             rows.append(
@@ -84,7 +84,7 @@ class GetCSV(object):
             for j in range(len(self.headers)):
                 row[self.headers[j]] = i[j]
             row['Date Created Time'] = (dt.datetime.strptime(row['Date Created Time'], '%m/%d/%Y %H:%M')).strftime(
-                                        '%m-%d-%Y %I:%M:%S %p')
+                                        '%m-%d-%Y %H:%M:%S')
             if row['NEXT VISITSCHEDULED'] != '':
                 row['NEXT VISITSCHEDULED'] = (dt.datetime.strptime(row['NEXT VISITSCHEDULED'],
                                                '%m/%d/%Y')).strftime('%m-%d-%Y')
