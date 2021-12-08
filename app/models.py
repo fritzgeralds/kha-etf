@@ -12,7 +12,7 @@ def yesNo(value):
 def getIndex(value, list):
     for i in list:
         if i.lower() == value.lower():
-            return list.index(i + 1)
+            return int(list.index(i)) + 1
     return
 
 DATE_RE = r"^([1-9]|0[1-9]|1[0-2])(\.|-|/)([1-9]|0[1-9]|1[0-9]|2[0-9]|3[0-1])(\.|-|/)([0-9][0-9]|19[0-9][0-9]|20[0-9][0-9])($| .+$)"
@@ -41,6 +41,10 @@ ATTEMPT_SUCCESFUL_DISPOSITION = [
     'Program Ineligible'
 ]
 
+SITE_TIN = "956001629"
+SITE_NPI = "437825213"
+PROGRAM_NAME = "CSS"
+
 class GetCSV(object):
     def __init__(self, filename):
         self.name = filename.split('.')[0]
@@ -68,7 +72,7 @@ class GetCSV(object):
                 f"{row['Middle Name']}|{row['Email Address']}|{row['Member Mobile Phone Number?']}|"
                 f"{row['Member Opt in for texting?']}|{row['Member Opt in for automated calls?']}|"
                 f"{row['Address']}|{row['Address2']}|{row['City']}|{row['State']}|{row['ZIP Code']}|"
-                f"SITE_TIN|SITE_NPI")
+                f"{SITE_TIN}|{SITE_NPI}")
             counter += 1
         return rows
 
@@ -81,7 +85,7 @@ class GetCSV(object):
                 row[self.headers[j]] = i[j]
             row['Date Created Time'] = (dt.datetime.strptime(row['Date Created Time'], '%m/%d/%Y %H:%M')).strftime(
                                         '%m-%d-%Y %I:%M:%S %p')
-            if row['NEXT VISITSCHEDULED'] != '':
+            if row['NEXT VISITSCHEDULED'] != ''
                 row['NEXT VISITSCHEDULED'] = (dt.datetime.strptime(row['NEXT VISITSCHEDULED'],
                                                '%m/%d/%Y')).strftime('%m-%d-%Y')
             if row['Project Start Date'] != '':
@@ -96,7 +100,7 @@ class GetCSV(object):
                 f"{yesNo(row['Member Next Visit Scheduled?'])}|{row['NEXT VISITSCHEDULED']}|{row['Contact Role']}|"
                 f"{row['Contact Role Other']}|{row['Project Start Date']}|{row['Project Start Date']}|"
                 f"{row['Project Exit Date']}|{row['Enrollment Flag']}|"
-                f"SITE_TIN|SITE_NPI|PROGRAM_NAME||||")
+                f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}||||")
             counter += 1
         return rows
 
@@ -108,11 +112,11 @@ class GetCSV(object):
             for j in range(len(self.headers)):
                 row[self.headers[j]] = i[j]
             row['Added Date'] = (dt.datetime.strptime(row['Added Date'], '%Y-%m-%d')).strftime(
-                '%m-%d-%Y %I:%M:%S %p')
+                '%m-%d-%Y %H:%M:%S')
             row['Appointment Date'] = (dt.datetime.strptime(row['Appointment Date'],
-                                                            '%Y-%m-%d')).strftime('%m-%d-%Y %I:%M:%S %p')
+                                                            '%Y-%m-%d')).strftime('%m-%d-%Y')
             row['Attempt to contact Client Date'] = (dt.datetime.strptime(row['Attempt to contact Client Date'],
-                                                                          '%Y-%m-%d')).strftime('%m-%d-%Y %I:%M:%S %p')
+                                                                          '%Y-%m-%d')).strftime('%m-%d-%Y')
             if row['Attempt to contact Client Result'] != '':
                 row['Attempt to contact Client Result'] = getIndex(row['Attempt to contact Client Result'], ATTEMPT_RESULT)
             else:
@@ -132,6 +136,6 @@ class GetCSV(object):
                 f"|{row['Added Date']}|1|{row['KHS ID']}|{row['CIN']}|"
                 f"{yesNo(row['Appointment Rescheduled'])}|{yesNo(row['Appointment Cancelled'])}|{row['Appointment Date']}|{row['Attempt to contact Client Date']}|"
                 f"{row['Attempt to contact Client Result']}|{row['Attempt to contact client Unsuccessful Disposition']}|{row['Attempt to contact client Successful Disposition']}|"
-                f"|SITE_TIN|SITE_NPI|PROGRAM_NAME||||")
+                f"|{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}||||")
             counter += 1
         return rows
