@@ -111,18 +111,18 @@ class GetCSV(object):
             row = {}
             for j in range(len(self.headers)):
                 row[self.headers[j]] = i[j]
-            row['Added Time'] = (dt.datetime.strptime(row['Added Date'], '%Y-%m-%d %H:%M:%S')).strftime(
+            row['Added Time'] = (dt.datetime.strptime(row['Added Time'], '%Y-%m-%d %H:%M:%S')).strftime(
                 '%m-%d-%Y %H:%M:%S')
             row['Appointment Date'] = (dt.datetime.strptime(row['Appointment Date'],
                                                             '%Y-%m-%d')).strftime('%m-%d-%Y')
             row['Appointment Time'] = (dt.datetime.strptime(row['Appointment Time'],
-                                                            '%H:%M:%S')).strftime('%I:%M:%S %p')
+                                                            '%H:%M:%S')).strftime('%I:%M:%S')
             appointment = row['Appointment Date'] + ' ' + row['Appointment Time']
             row['Attempt to contact Client Date'] = (dt.datetime.strptime(row['Attempt to contact Client Date'],
                                                                           '%Y-%m-%d')).strftime('%m-%d-%Y')
-            row['Attempt to contact client time'] = (dt.datetime.strptime(row['Attempt to contact time'],
-                                                                          '%H:%M:%S')).strftime('%I:%M:%S %p')
-            contact_client = row['Attempt to contact client time'] + ' ' + row['Appointment Time']
+            row['Attempt to contact client time:'] = (dt.datetime.strptime(row['Attempt to contact client time:'],
+                                                                          '%H:%M:%S')).strftime('%I:%M:%S')
+            contact_client = row['Attempt to contact Client Date'] + ' ' + row['Attempt to contact client time:']
             if row['Attempt to contact Client Result'] != '':
                 row['Attempt to contact Client Result'] = getIndex(row['Attempt to contact Client Result'], ATTEMPT_RESULT)
             else:
