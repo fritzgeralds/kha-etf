@@ -111,12 +111,18 @@ class GetCSV(object):
             row = {}
             for j in range(len(self.headers)):
                 row[self.headers[j]] = i[j]
-            row['Added Date'] = (dt.datetime.strptime(row['Added Date'], '%Y-%m-%d')).strftime(
+            row['Added Time'] = (dt.datetime.strptime(row['Added Date'], '%Y-%m-%d %H:%M:%S')).strftime(
                 '%m-%d-%Y %H:%M:%S')
             row['Appointment Date'] = (dt.datetime.strptime(row['Appointment Date'],
                                                             '%Y-%m-%d')).strftime('%m-%d-%Y')
+            row['Appointment Time'] = (dt.datetime.strptime(row['Appointment Time'],
+                                                            '%H:%M:%S')).strftime('%I:%M:%S %p')
+            appointment = row['Appointment Date'] + ' ' + row['Appointment Time']
             row['Attempt to contact Client Date'] = (dt.datetime.strptime(row['Attempt to contact Client Date'],
                                                                           '%Y-%m-%d')).strftime('%m-%d-%Y')
+            row['Attempt to contact client time'] = (dt.datetime.strptime(row['Attempt to contact time'],
+                                                                          '%H:%M:%S')).strftime('%I:%M:%S %p')
+            contact_client = row['Attempt to contact client time'] + ' ' + row['Appointment Time']
             if row['Attempt to contact Client Result'] != '':
                 row['Attempt to contact Client Result'] = getIndex(row['Attempt to contact Client Result'], ATTEMPT_RESULT)
             else:
@@ -133,8 +139,8 @@ class GetCSV(object):
                 row['Attempt to contact client Successful Disposition'] = ''
             rows.append(
                 '{0:04}'.format(counter) +
-                f"|{row['Added Date']}|1|{row['KHS ID']}|{row['CIN']}|"
-                f"{yesNo(row['Appointment Rescheduled'])}|{yesNo(row['Appointment Cancelled'])}|{row['Appointment Date']}|{row['Attempt to contact Client Date']}|"
+                f"|{row['Added Time']}|1|{row['KHS ID']}|{row['CIN']}|"
+                f"{yesNo(row['Appointment Rescheduled'])}|{yesNo(row['Appointment Cancelled'])}|{appointment}|{contact_client}|"
                 f"{row['Attempt to contact Client Result']}|{row['Attempt to contact client Unsuccessful Disposition']}|{row['Attempt to contact client Successful Disposition']}|"
                 f"|{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}||||")
             counter += 1
