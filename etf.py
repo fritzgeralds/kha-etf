@@ -7,7 +7,7 @@ from watchdog.events import PatternMatchingEventHandler
 import argparse
 import os
 import shutil
-from app.models import GetCSV
+from app.models import GetCSV, GetType
 from app.config import Config
 # from mailer import sendmail ## for future failure alert email
 
@@ -58,8 +58,9 @@ def process(event, file):
         sys.stdout.write('\r' + 'Converting {} to TXT format.'.format(file))
         copy = 1
         try:
+            ftype = GetType(file)
             conversion = GetCSV(file)
-            if 'Enrollment ID' in conversion.headers:
+            if 'Enrollment ID' in ftype.headers:
                 filename = 'HOUSINGAUTH24STCSS_KHS_CSS_ENROLLMENT_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
                 while True:
@@ -72,8 +73,8 @@ def process(event, file):
                     rows = conversion.get_row_enrollment()
                     for row in rows:
                         f.write(row + '\n')
-            elif 'General ID' in conversion.headers:
-                filename = 'HOUSINGAUTH24STCSS_KHS_CSS_DEMOGRAPHICS_' + env + '_' + \
+            elif 'General ID' in ftype.headers:
+                filename = 'KERNHOUSINGAUTH_KHS_NONPROGRAM_DEMOGRAPHIC_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
                 while True:
                     if os.path.exists(outdir + '\\' + filename + '.txt'):
@@ -85,7 +86,7 @@ def process(event, file):
                     rows = conversion.get_row_demographics()
                     for row in rows:
                         f.write(row + '\n')
-            elif 'Assessment ID' in conversion.headers:
+            elif 'Assessment ID' in ftype.headers:
                 filename = 'HOUSINGAUTH24STCSS_KHS_CSS_OUTREACH_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
                 while True:
