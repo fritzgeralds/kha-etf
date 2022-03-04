@@ -19,7 +19,7 @@ def getKey(val, reason):
     for key, value in reason.items():
          if val.lower() == value.lower():
              return key
-    return ''
+    return 'OTH'
 
 
 def lowerHeaders(headers):
@@ -160,8 +160,11 @@ class GetCSV(object):
                 f"|{row[3]}|1|{row[4]}|{row[5]}|"
                 f"{yesNo(row[6])}|{row[7]}|{row[8]}|"
                 f"{row[9]}|{row[10]}|{row[10]}|"
-                f"{row[11]}|{yesNo(row[13])}|{row[12]}|"
-                f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}||||||||")
+                f"{row[11]}|{yesNo(row[19])}|{row[12]}|"
+                f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}|{row[13] if (len(self.headers) >= 14) else ''}"
+                f"|{row[14] if (len(self.headers) >= 15) else ''}|{row[15] if (len(self.headers) >= 16) else ''}"
+                f"|{row[16] if (len(self.headers) >= 17) else ''}|{row[17] if (len(self.headers) >= 18) else ''}"
+                f"|{row[18] if (len(self.headers) >= 19) else ''}||")
             counter += 1
         return rows
 
