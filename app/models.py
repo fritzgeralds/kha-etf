@@ -212,7 +212,7 @@ class GetCSV(object):
                 '%m-%d-%Y %H:%M:%S')
             if row[6] != '':
                 row[6] = (dt.datetime.strptime(row[6].replace('/', '-'),
-                                           '%m-%d-%Y')).strftime('%m-%d-%Y')
+                                           '%m-%d-%Y')).strftime('%m-%d-%Y') + ' '
             else:
                 row[6] = ''
             if row[7] != '':
@@ -220,10 +220,10 @@ class GetCSV(object):
                                            '%H:%M:%S')).strftime('%H:%M:%S')
             else:
                 row[7] = ''
-            appointment = row[6] + ' ' + row[7]
+            appointment = row[6] + row[7]
             if row[8] != '':
                row[8] = (dt.datetime.strptime(row[8].replace('/', '-'),
-                                           '%m-%d-%Y')).strftime('%m-%d-%Y')
+                                           '%m-%d-%Y')).strftime('%m-%d-%Y') + ' '
             else:
                 row[8] = ''
             if row[9] != '':
@@ -231,7 +231,7 @@ class GetCSV(object):
                                             '%H:%M:%S')).strftime('%H:%M:%S')
             else:
                 row[9] = ''
-            contact_client = row[8] + ' ' + row[9]
+            contact_client = row[8] + row[9]
             if row[10] != '':
                 row[10] = getIndex(row[10], ATTEMPT_RESULT)
             else:
