@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 from time import sleep
 from watchdog.observers import Observer
@@ -49,54 +49,53 @@ else:
 
 if not os.path.exists(outdir):
     os.makedirs(outdir)
-    if not os.path.exists(indir + '\\processed'):
-        os.makedirs(indir + '\\processed')
+if not os.path.exists(indir + '\\processed'):
+    os.makedirs(indir + '\\processed')
 
 
 def process(event, file):
     if file.endswith('.csv'):
         sys.stdout.write('\r' + 'Converting {} to TXT format.'.format(file))
-        copy = 1
         try:
             ftype = GetType(file)
             conversion = GetCSV(file)
             if 'Enrollment ID' in ftype.headers:
                 filename = 'HOUSINGAUTH24STCSS_KHS_CSS_ENROLLMENT_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-                while True:
-                    if os.path.exists(outdir + '\\' + filename + '.txt'):
-                        filename = filename + '_' + str(copy)
-                        copy += 1
-                    else:
-                        break
+                bad_filename = 'BAD ROWS_HOUSINGAUTH24STCSS_KHS_CSS_ENROLLMENT_' + env + '_' + \
+                               datetime.strftime(datetime.now() + timedelta(seconds=1), '%Y%m%d%H%M%S')
                 with open(outdir + '\\' + filename + '.txt', 'w') as f:
-                    rows = conversion.get_row_enrollment()
+                    rows = conversion.get_row_enrollment()[0]
+                    for row in rows:
+                        f.write(row + '\n')
+                with open(outdir + '\\' + bad_filename + '.txt', 'w') as f:
+                    rows = conversion.get_row_enrollment()[1]
                     for row in rows:
                         f.write(row + '\n')
             elif 'General ID' in ftype.headers:
                 filename = 'KERNHOUSINGAUTH_KHS_NONPROGRAM_DEMOGRAPHIC_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-                while True:
-                    if os.path.exists(outdir + '\\' + filename + '.txt'):
-                        filename = filename + '_' + str(copy)
-                        copy += 1
-                    else:
-                        break
+                bad_filename = 'BAD ROWS_KERNHOUSINGAUTH_KHS_NONPROGRAM_DEMOGRAPHIC_' + env + '_' + \
+                               datetime.strftime(datetime.now() + timedelta(seconds=1), '%Y%m%d%H%M%S')
                 with open(outdir + '\\' + filename + '.txt', 'w') as f:
-                    rows = conversion.get_row_demographics()
+                    rows = conversion.get_row_demographics()[0]
+                    for row in rows:
+                        f.write(row + '\n')
+                with open(outdir + '\\' + bad_filename + '.txt', 'w') as f:
+                    rows = conversion.get_row_demographics()[1]
                     for row in rows:
                         f.write(row + '\n')
             elif 'Assessment ID' in ftype.headers:
                 filename = 'HOUSINGAUTH24STCSS_KHS_CSS_OUTREACH_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-                while True:
-                    if os.path.exists(outdir + '\\' + filename + '.txt'):
-                        filename = filename + '_' + str(copy)
-                        copy += 1
-                    else:
-                        break
+                bad_filename = 'BAD ROWS_HOUSINGAUTH24STCSS_KHS_CSS_OUTREACH_' + env + '_' + \
+                               datetime.strftime(datetime.now() + timedelta(seconds=1), '%Y%m%d%H%M%S')
                 with open(outdir + '\\' + filename + '.txt', 'w') as f:
-                    rows = conversion.get_row_outreach()
+                    rows = conversion.get_row_outreach()[0]
+                    for row in rows:
+                        f.write(row + '\n')
+                with open(outdir + '\\' + bad_filename + '.txt', 'w') as f:
+                    rows = conversion.get_row_outreach()[1]
                     for row in rows:
                         f.write(row + '\n')
             else:

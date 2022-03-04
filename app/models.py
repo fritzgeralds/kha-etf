@@ -105,6 +105,8 @@ class GetCSV(object):
     def get_row_demographics(self):
         counter = 1
         rows = []
+        bad_count = 1
+        bad_rows = []
         for i in self.rows:
             row = {}
             for j in range(len(self.headers)):
@@ -122,21 +124,36 @@ class GetCSV(object):
             row[19] = row[19] if row[19] else 'None'
             row[20] = row[20] if row[20] else 'NA'
             row[21] = row[21] if row[21] else '00000'
-            rows.append(
-                '{0:04}'.format(counter) +
-                f"|{row[3]}|1|{row[4]}|{row[5]}|"
-                f"{row[6]}|{row[7][0]}|{row[8]}|{row[9]}|"
-                f"{row[10]}|{row[11]}|{row[12]}|"
-                f"{row[13]}|{row[14]}|"
-                f"{row[15]}|{row[16]}|"
-                f"{row[17]}|{row[18]}|{row[19]}|{row[20]}|{row[21]}|"
-                f"{SITE_TIN}|{SITE_NPI}")
-            counter += 1
-        return rows
+            if len(row[5]) != 9:
+                bad_rows.append(
+                    '{0:04}'.format(bad_count) +
+                    f"|{row[3]}|0|{row[4]}|{row[5]}|"
+                    f"{row[6]}|{row[7][0]}|{row[8]}|{row[9]}|"
+                    f"{row[10]}|{row[11]}|{row[12]}|"
+                    f"{row[13]}|{row[14]}|"
+                    f"{row[15]}|{row[16]}|"
+                    f"{row[17]}|{row[18]}|{row[19]}|{row[20]}|{row[21]}|"
+                    f"{SITE_TIN}|{SITE_NPI}")
+                bad_count += 1
+            else:
+                rows.append(
+                    '{0:04}'.format(counter) +
+                    f"|{row[3]}|0|{row[4]}|{row[5]}|"
+                    f"{row[6]}|{row[7][0]}|{row[8]}|{row[9]}|"
+                    f"{row[10]}|{row[11]}|{row[12]}|"
+                    f"{row[13]}|{row[14]}|"
+                    f"{row[15]}|{row[16]}|"
+                    f"{row[17]}|{row[18]}|{row[19]}|{row[20]}|{row[21]}|"
+                    f"{SITE_TIN}|{SITE_NPI}")
+                counter += 1
+            lists = [rows, bad_rows]
+        return lists
 
     def get_row_enrollment(self):
         counter = 1
+        bad_count = 1
         rows = []
+        bad_rows = []
         for i in self.rows:
             row = {}
             for j in range(len(self.headers)):
@@ -153,24 +170,40 @@ class GetCSV(object):
                 row[11] = (dt.datetime.strptime(row[11],
                                                '%m/%d/%Y')).strftime('%m-%d-%Y')
             row[8] = getIndex(row[8], CONTACT_ROLE)
-            if row[13] != '1':
+            if row[19] != '1':
                 row[12] = getKey(row[12], DISENROLLMENT_REASON)
-            rows.append(
-                '{0:04}'.format(counter) +
-                f"|{row[3]}|1|{row[4]}|{row[5]}|"
-                f"{yesNo(row[6])}|{row[7]}|{row[8]}|"
-                f"{row[9]}|{row[10]}|{row[10]}|"
-                f"{row[11]}|{yesNo(row[19])}|{row[12]}|"
-                f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}|{row[13] if (len(self.headers) >= 14) else ''}"
-                f"|{row[14] if (len(self.headers) >= 15) else ''}|{row[15] if (len(self.headers) >= 16) else ''}"
-                f"|{row[16] if (len(self.headers) >= 17) else ''}|{row[17] if (len(self.headers) >= 18) else ''}"
-                f"|{row[18] if (len(self.headers) >= 19) else ''}||")
-            counter += 1
-        return rows
+            if len(row[5]) != 9:
+                bad_rows.append(
+                    '{0:04}'.format(bad_count) +
+                    f"|{row[3]}|0|{row[4]}|{row[5]}|"
+                    f"{yesNo(row[6])}|{row[7]}|{row[8]}|"
+                    f"{row[9]}|{row[10]}|{row[10]}|"
+                    f"{row[11]}|{yesNo(row[19])}|{row[12]}|"
+                    f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}|{row[13] if (len(self.headers) >= 14) else ''}"
+                    f"|{row[14] if (len(self.headers) >= 15) else ''}|{row[15] if (len(self.headers) >= 16) else ''}"
+                    f"|{row[16] if (len(self.headers) >= 17) else ''}|{row[17] if (len(self.headers) >= 18) else ''}"
+                    f"|{row[18] if (len(self.headers) >= 19) else ''}||")
+                bad_count += 1
+            else:
+                rows.append(
+                    '{0:04}'.format(counter) +
+                    f"|{row[3]}|0|{row[4]}|{row[5]}|"
+                    f"{yesNo(row[6])}|{row[7]}|{row[8]}|"
+                    f"{row[9]}|{row[10]}|{row[10]}|"
+                    f"{row[11]}|{yesNo(row[19])}|{row[12]}|"
+                    f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}|{row[13] if (len(self.headers) >= 14) else ''}"
+                    f"|{row[14] if (len(self.headers) >= 15) else ''}|{row[15] if (len(self.headers) >= 16) else ''}"
+                    f"|{row[16] if (len(self.headers) >= 17) else ''}|{row[17] if (len(self.headers) >= 18) else ''}"
+                    f"|{row[18] if (len(self.headers) >= 19) else ''}||")
+                counter += 1
+            lists = [rows, bad_rows]
+        return lists
 
     def get_row_outreach(self):
         counter = 1
         rows = []
+        bad_count = 1
+        bad_rows = []
         for i in self.rows:
             row = {}
             for j in range(len(self.headers)):
@@ -213,15 +246,29 @@ class GetCSV(object):
                     row[12], ATTEMPT_SUCCESFUL_DISPOSITION)
             else:
                 row[12] = ''
-            rows.append(
-                '{0:04}'.format(counter) +
-                f"|{row[1]}|1|{row[2]}|{row[3]}|"
-                f"{yesNo(row[4])}|{yesNo(row[5])}|{appointment}|{contact_client}|"
-                f"{row[10]}|{row[11]}|{row[12]}|"
-                f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}|{row[13] if (len(self.headers) >= 14) else ''}"
-                f"|{row[14] if (len(self.headers) >= 15) else ''}|{row[15] if (len(self.headers) >= 16) else ''}"
-                f"|{row[16] if (len(self.headers) >= 17) else ''}|{row[17] if (len(self.headers) >= 18) else ''}"
-                f"|{row[18] if (len(self.headers) >= 19) else ''}|{row[19] if (len(self.headers) >= 20) else ''}"
-                f"|{row[20] if (len(self.headers) >= 21) else ''}")
-            counter += 1
-        return rows
+            if len(row[3]) != 9:
+                bad_rows.append(
+                    '{0:04}'.format(bad_count) +
+                    f"|{row[1]}|0|{row[2]}|{row[3]}|"
+                    f"{yesNo(row[4])}|{yesNo(row[5])}|{appointment}|{contact_client}|"
+                    f"{row[10]}|{row[11]}|{row[12]}|"
+                    f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}|{row[13] if (len(self.headers) >= 14) else ''}"
+                    f"|{row[14] if (len(self.headers) >= 15) else ''}|{row[15] if (len(self.headers) >= 16) else ''}"
+                    f"|{row[16] if (len(self.headers) >= 17) else ''}|{row[17] if (len(self.headers) >= 18) else ''}"
+                    f"|{row[18] if (len(self.headers) >= 19) else ''}|{row[19] if (len(self.headers) >= 20) else ''}"
+                    f"|{row[20] if (len(self.headers) >= 21) else ''}")
+                bad_count += 1
+            else:
+                rows.append(
+                    '{0:04}'.format(counter) +
+                    f"|{row[1]}|0|{row[2]}|{row[3]}|"
+                    f"{yesNo(row[4])}|{yesNo(row[5])}|{appointment}|{contact_client}|"
+                    f"{row[10]}|{row[11]}|{row[12]}|"
+                    f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}|{row[13] if (len(self.headers) >= 14) else ''}"
+                    f"|{row[14] if (len(self.headers) >= 15) else ''}|{row[15] if (len(self.headers) >= 16) else ''}"
+                    f"|{row[16] if (len(self.headers) >= 17) else ''}|{row[17] if (len(self.headers) >= 18) else ''}"
+                    f"|{row[18] if (len(self.headers) >= 19) else ''}|{row[19] if (len(self.headers) >= 20) else ''}"
+                    f"|{row[20] if (len(self.headers) >= 21) else ''}")
+                counter += 1
+            lists = [rows, bad_rows]
+        return lists
