@@ -113,8 +113,15 @@ class GetCSV(object):
                 row[self.headers[j]] = i[j]
             row[3] = (dt.datetime.strptime(row[3], '%m/%d/%Y %H:%M')).strftime(
                 '%m-%d-%Y %H:%M:%S')
-            row[6] = (dt.datetime.strptime(row[6],
-                                           '%m/%d/%Y')).strftime('%m-%d-%Y')
+            if row[6] != '':
+                row[6] = (dt.datetime.strptime(row[6],
+                                               '%m/%d/%Y')).strftime('%m-%d-%Y')
+            else:
+                row[6] = ''
+            if row[7][0] == 'M' or row[7][0] == 'F':
+                gender = row[7][0]
+            else:
+                gender = 'U'
             row[12] = re.sub('\D', '', row[12]) if row[12] else ''
             row[13] = yesNo(row[13]) if row[13] else '0'
             row[14] = yesNo(row[14]) if row[14] else '0'
@@ -127,8 +134,8 @@ class GetCSV(object):
             if len(row[5]) != 9:
                 bad_rows.append(
                     '{0:04}'.format(bad_count) +
-                    f"|{row[3]}|0|{row[4]}|{row[5]}|"
-                    f"{row[6]}|{row[7][0]}|{row[8]}|{row[9]}|"
+                    f"|{row[3]}|0|{row[4].upper()}|{row[5].upper()}|"
+                    f"{row[6]}|{gender}|{row[8]}|{row[9]}|"
                     f"{row[10]}|{row[11]}|{row[12]}|"
                     f"{row[13]}|{row[14]}|"
                     f"{row[15]}|{row[16]}|"
@@ -138,8 +145,8 @@ class GetCSV(object):
             else:
                 rows.append(
                     '{0:04}'.format(counter) +
-                    f"|{row[3]}|0|{row[4]}|{row[5]}|"
-                    f"{row[6]}|{row[7][0]}|{row[8]}|{row[9]}|"
+                    f"|{row[3]}|0|{row[4].upper()}|{row[5].upper()}|"
+                    f"{row[6]}|{gender}|{row[8]}|{row[9]}|"
                     f"{row[10]}|{row[11]}|{row[12]}|"
                     f"{row[13]}|{row[14]}|"
                     f"{row[15]}|{row[16]}|"
@@ -175,7 +182,7 @@ class GetCSV(object):
             if len(row[5]) != 9:
                 bad_rows.append(
                     '{0:04}'.format(bad_count) +
-                    f"|{row[3]}|0|{row[4]}|{row[5]}|"
+                    f"|{row[3]}|0|{row[4].upper()}|{row[5].upper()}|"
                     f"{yesNo(row[6])}|{row[7]}|{row[8]}|"
                     f"{row[9]}|{row[10]}|{row[10]}|"
                     f"{row[11]}|{yesNo(row[19])}|{row[12]}|"
@@ -187,7 +194,7 @@ class GetCSV(object):
             else:
                 rows.append(
                     '{0:04}'.format(counter) +
-                    f"|{row[3]}|0|{row[4]}|{row[5]}|"
+                    f"|{row[3]}|0|{row[4].upper()}|{row[5].upper()}|"
                     f"{yesNo(row[6])}|{row[7]}|{row[8]}|"
                     f"{row[9]}|{row[10]}|{row[10]}|"
                     f"{row[11]}|{yesNo(row[19])}|{row[12]}|"
@@ -249,7 +256,7 @@ class GetCSV(object):
             if len(row[3]) != 9:
                 bad_rows.append(
                     '{0:04}'.format(bad_count) +
-                    f"|{row[1]}|0|{row[2]}|{row[3]}|"
+                    f"|{row[1]}|0|{row[2].upper()}|{row[3].upper()}|"
                     f"{yesNo(row[4])}|{yesNo(row[5])}|{appointment}|{contact_client}|"
                     f"{row[10]}|{row[11]}|{row[12]}|"
                     f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}|{row[13] if (len(self.headers) >= 14) else ''}"
@@ -261,7 +268,7 @@ class GetCSV(object):
             else:
                 rows.append(
                     '{0:04}'.format(counter) +
-                    f"|{row[1]}|0|{row[2]}|{row[3]}|"
+                    f"|{row[1]}|0|{row[2].upper()}|{row[3].upper()}|"
                     f"{yesNo(row[4])}|{yesNo(row[5])}|{appointment}|{contact_client}|"
                     f"{row[10]}|{row[11]}|{row[12]}|"
                     f"{SITE_TIN}|{SITE_NPI}|{PROGRAM_NAME}|{row[13] if (len(self.headers) >= 14) else ''}"
