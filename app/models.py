@@ -117,7 +117,7 @@ class GetCSV(object):
                 row[6] = (dt.datetime.strptime(row[6],
                                                '%m/%d/%Y')).strftime('%m-%d-%Y')
             else:
-                row[6] = ''
+                row[6] = 'MISSING DOB'
             if row[7][0] == 'M' or row[7][0] == 'F':
                 gender = row[7][0]
             else:
@@ -131,7 +131,7 @@ class GetCSV(object):
             row[19] = row[19] if row[19] else 'None'
             row[20] = row[20] if row[20] else 'NA'
             row[21] = row[21] if row[21] else '00000'
-            if len(row[5]) != 9:
+            if len(row[5]) != 9 or len(row[6]) != 10:
                 bad_rows.append(
                     '{0:04}'.format(bad_count) +
                     f"|{row[3]}|0|{row[4].upper()}|{row[5].upper()}|"
