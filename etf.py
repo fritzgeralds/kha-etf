@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from datetime import datetime, timedelta
+from datetime import datetime
 import sys
 from time import sleep
 from watchdog.observers import Observer
@@ -7,45 +7,33 @@ from watchdog.events import PatternMatchingEventHandler
 import argparse
 import os
 import shutil
+from app.utils.helpers import get_type
 from app.models import GetCSV, GetType
-from app.config import Config
+from app.core.config import Config
 # from mailer import sendmail ## for future failure alert email
+
 
 cfg = Config()
 env = "T" if cfg.environment.lower() == 'testing' else "P"
 
 parser = argparse.ArgumentParser(description='ETF Watchdog')
-parser.add_argument('-i', help='Directory to watch for new files. Default is current directory.',
-                    required=False, type=str, default=os.getcwd(), dest='input', action='store', nargs='?',
+parser.add_argument('-i', '--input', help='Directory to watch for new files. Default is current directory.',
+                    required=False, type=str, default=os.getcwd(), dest='indir', action='store', nargs='?',
                     const=os.getcwd(), metavar='WATCH_DIR')
-parser.add_argument('-o', help='Directory to save converted files to. Default is current directory.',
-                    required=False, type=str, default=os.getcwd(), dest='output', action='store', nargs='?',
+parser.add_argument('-o', '--output', help='Directory to save converted files to. Default is current directory.',
+                    required=False, type=str, default=os.getcwd(), dest='outdir', action='store', nargs='?',
                     const=os.getcwd(), metavar='SAVE_DIR')
-parser.add_argument('-p', help='Pattern to match. Default is "*.CSV".', required=False, type=str,
+parser.add_argument('-p', '--pattern', help='Pattern to match. Default is "*.CSV".', required=False, type=str,
                     dest='pattern', default='*.csv')
-parser.add_argument('-t', help='Timeout between checks in seconds. Default is 5 seconds.',
+parser.add_argument('-t', '--timeout', help='Timeout between checks in seconds. Default is 5 seconds.',
                     required=False, type=int, default=5, dest='timeout', action='store', nargs='?', const=5,
                     metavar='<timeout>')
-parser.add_argument('-r', help='Search recursively for files matching pattern. Default is False.',
+parser.add_argument('-r', '--recursive', help='Search recursively for files matching pattern. Default is False.',
                     required=False, dest='recursive', action='store_true', default=False)
 args = parser.parse_args()
 
-if args.input:
-    indir = args.input
-
-if args.output:
-    outdir = args.output
-
-if args.pattern:
-    pattern = args.pattern
-
-if args.timeout:
-    timeout = args.timeout
-
-if args.recursive:
-    recursive = True
-else:
-    recursive = False
+for arg in args.__dict__.keys():
+    globals()[arg] = args.__dict__[arg]
 
 if not os.path.exists(outdir):
     os.makedirs(outdir)
@@ -55,51 +43,40 @@ if not os.path.exists(indir + '\\processed'):
 
 def process(event, file):
     if file.endswith('.csv'):
-        sys.stdout.write('\r' + 'Converting {} to TXT format.'.format(file))
+        sys.stdout.write('\r' + 'Converting {} to TXT format.'.format(file) + '\n')
         try:
-            ftype = GetType(file)
-            conversion = GetCSV(file)
+            csv_type = get_type(file)
+            conversion = GetCSV(file, outdir)
+            good_rows = []
+            bad_rows = []
+            filename = ''
+            if csv_type == 'demographics':
+                filename = 'KERNHOUSINGAUTH_KHS_NONPROGRAM_DEMOGRAPHIC_' + env + '_' + \
+                           datetime.strftime(datetime.now(), '%Y%m%d%H%M%S') + '.txt'
+
             if 'Enrollment ID' in ftype.headers:
                 filename = 'HOUSINGAUTH24STCSS_KHS_CSS_ENROLLMENT_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-                bad_filename = 'BAD ROWS_HOUSINGAUTH24STCSS_KHS_CSS_ENROLLMENT_' + env + '_' + \
-                               datetime.strftime(datetime.now() + timedelta(seconds=1), '%Y%m%d%H%M%S')
-                with open(outdir + '\\' + filename + '.txt', 'w') as f:
-                    rows = conversion.get_row_enrollment()[0]
-                    for row in rows:
-                        f.write(row + '\n')
-                with open(outdir + '\\' + bad_filename + '.txt', 'w') as f:
-                    rows = conversion.get_row_enrollment()[1]
-                    for row in rows:
-                        f.write(row + '\n')
+                good_rows, bad_rows = conversion.get_row_enrollment()
             elif 'General ID' in ftype.headers:
                 filename = 'KERNHOUSINGAUTH_KHS_NONPROGRAM_DEMOGRAPHIC_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-                bad_filename = 'BAD ROWS_KERNHOUSINGAUTH_KHS_NONPROGRAM_DEMOGRAPHIC_' + env + '_' + \
-                               datetime.strftime(datetime.now() + timedelta(seconds=1), '%Y%m%d%H%M%S')
-                with open(outdir + '\\' + filename + '.txt', 'w') as f:
-                    rows = conversion.get_row_demographics()[0]
-                    for row in rows:
-                        f.write(row + '\n')
-                with open(outdir + '\\' + bad_filename + '.txt', 'w') as f:
-                    rows = conversion.get_row_demographics()[1]
-                    for row in rows:
-                        f.write(row + '\n')
+                good_rows, bad_rows = conversion.get_row_demographics()
             elif 'Assessment ID' in ftype.headers:
                 filename = 'HOUSINGAUTH24STCSS_KHS_CSS_OUTREACH_' + env + '_' + \
                            datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
-                bad_filename = 'BAD ROWS_HOUSINGAUTH24STCSS_KHS_CSS_OUTREACH_' + env + '_' + \
-                               datetime.strftime(datetime.now() + timedelta(seconds=1), '%Y%m%d%H%M%S')
-                with open(outdir + '\\' + filename + '.txt', 'w') as f:
-                    rows = conversion.get_row_outreach()[0]
-                    for row in rows:
-                        f.write(row + '\n')
-                with open(outdir + '\\' + bad_filename + '.txt', 'w') as f:
-                    rows = conversion.get_row_outreach()[1]
-                    for row in rows:
-                        f.write(row + '\n')
+                good_rows, bad_rows = conversion.get_row_outreach()
             else:
                 print('\n' + 'Error: File {} does not contain a valid header.'.format(file.split('\\')[-1]))
+            if filename:
+                if good_rows:
+                    with open(outdir + '\\' + filename + '.txt', 'w') as f:
+                        for row in good_rows:
+                            f.write(row + '\n')
+                if bad_rows:
+                    with open(outdir + '\\BAD_ROWS_' + filename + '.txt', 'w') as f:
+                        for row in bad_rows:
+                            f.write(row + '\n')
             shutil.move(os.path.join(indir, file.split('\\')[-1]), os.path.join(indir + '\\processed', file.split('\\')[-1]))
         except Exception as e:
             print(e)

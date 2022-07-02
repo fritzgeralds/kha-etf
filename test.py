@@ -1,4 +1,4 @@
-from app.mailer import sendmail
+from app.utils.mailer import sendmail
 
 
 if __name__ == "__main__":
