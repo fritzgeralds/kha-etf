@@ -3,6 +3,8 @@ from datetime import datetime
 
 from app.core.config import Config
 
+from app.utils.globals import CONTACT_ROLE, DISENROLLMENT_REASON
+
 cfg = Config()
 env = "P" if cfg.environment.lower() == 'production' else "T"
 
@@ -22,14 +24,20 @@ def get_type(file):
     return None
 
 
-def format_date(date) -> str:
+def format_date_time(v) -> str:
     try:
-        formatted = (datetime.strptime(date.replace('/', '-'),
+        formatted = (datetime.strptime(v.replace('/', '-'),
                                        '%Y-%m-%d %H:%M:%S')).strftime('%m-%d-%Y %H:%M:%S')
     except ValueError:
-        formatted = (datetime.strptime(date.replace('/', '-'),
+        formatted = (datetime.strptime(v.replace('/', '-'),
                                        '%Y-%m-%d %H:%M')).strftime('%m-%d-%Y %H:%M:%S')
     return formatted
+
+
+def format_date(v):
+    if v:
+        return datetime.strptime(v, '%Y-%m-%d').strftime('%m-%d-%Y')
+    return None
 
 
 def get_gender(v):
@@ -38,6 +46,22 @@ def get_gender(v):
         return v[0]
     return None
 
+
+def yes_no(v):
+    return 1 if v.lower() == 'yes' or v == 1 else 0
+
+
+def get_index(v, lst):
+    if v.lower() in lst.lower():
+        return lst.index(v.lower())
+    return None
+
+
+def get_key(v, dct):
+    for key, val in dct.items():
+        if v.lower() == val.lower():
+            return key
+    return None
 
 
 class GetCSV:

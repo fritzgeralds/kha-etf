@@ -6,6 +6,7 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 import argparse
 import os
+
 from app.utils.helpers import get_type
 from app.utils.helpers import *
 from app.models.demographics import Demographics
@@ -52,12 +53,56 @@ def process(event, file):
             good_rows = []
             bad_rows = []
             row_count = 1
+            for row in csv.rows:
+                if csv.model == 'demographics':
+                    data = {
+                            'id': "%04d" % row_count,
+                            'date': format_date_time(row[3]),
+                            'mem_id': row[4],
+                            'cin': row[5],
+                            'dob': row[7],
+                            'gender': get_gender(row[8]),
+                            'last_name': row[9].title(),
+                            'first_name': row[10].title(),
+                            'middle_name': row[11].title(),
+                            'email': row[12],
+                            'opt_txt': row[14],
+                            'opt_call': row[15],
+                            'phone': {
+                                'home': row[16],
+                                'work': row[17],
+                                'cell': row[13]
+                            },
+                            'address': {
+                                'street': row[18],
+                                'street2': row[19],
+                                'city': row[20],
+                                'state': row[21],
+                                'zip': row[22]
+                            }
+                        }
+                if csv.model == 'emrollment':
+                    data = {
+                            'id': "%04d" % row_count,
+                            'date': format_date_time(row[3]),
+                            'mem_id': row[4],
+                            'cin': row[5],
+                            'next_visit': yes_no(row[7]),
+                            'next_visit_date': format_date(row[8]),
+                            'role': get_index(row[9], CONTACT_ROLE),
+                            'role_other': row[10],
+                            'contact_date': format_date_time(row[11]),
+                            'effective_date': format_date_time(row[11]),
+                            'term_date': format_date_time(row[11]),
+                            'enrollment_flag': yes_no(row[12]),
+                            'disenrollment_reason': get_key(row[13], DISENROLLMENT_REASON),
+                        }
             if csv.model == 'demographics':
                 for row in csv.rows:
                     try:
                         good_rows.append(Demographics(**{
                             'id': "%04d" % row_count,
-                            'date': format_date(row[3]),
+                            'date': format_date_time(row[3]),
                             'mem_id': row[4],
                             'cin': row[5],
                             'dob': row[7],
