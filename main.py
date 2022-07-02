@@ -55,32 +55,7 @@ def process(event, file):
             row_count = 1
             for row in csv.rows:
                 if csv.model == 'demographics':
-                    data = {
-                            'id': "%04d" % row_count,
-                            'date': format_date_time(row[3]),
-                            'mem_id': row[4],
-                            'cin': row[5],
-                            'dob': row[7],
-                            'gender': get_gender(row[8]),
-                            'last_name': row[9].title(),
-                            'first_name': row[10].title(),
-                            'middle_name': row[11].title(),
-                            'email': row[12],
-                            'opt_txt': row[14],
-                            'opt_call': row[15],
-                            'phone': {
-                                'home': row[16],
-                                'work': row[17],
-                                'cell': row[13]
-                            },
-                            'address': {
-                                'street': row[18],
-                                'street2': row[19],
-                                'city': row[20],
-                                'state': row[21],
-                                'zip': row[22]
-                            }
-                        }
+                    pass
                 if csv.model == 'emrollment':
                     data = {
                             'id': "%04d" % row_count,

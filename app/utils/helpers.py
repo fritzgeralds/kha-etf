@@ -64,6 +64,17 @@ def get_key(v, dct):
     return None
 
 
+def build_udfs(row, pre):
+    count = 1
+    udfs = []
+    for i in range((len(row) - pre) // 2):
+        code = row[pre + (1 * i)]
+        desc = row[pre + (2 * i)]
+        if code and desc:
+            udfs.append({f'udf_{count}': {'code': code, 'desc': desc}})
+    return udfs
+
+
 class GetCSV:
     def __init__(self, file):
         self.file = file
@@ -85,3 +96,11 @@ class GetCSV:
                     self.headers[j] = j
                 self.rows = [row for row in reader]
             self.model = self.csv_type.split('_')[-1]
+
+    def build_txt_row(self, row, count):
+        data = {}
+        if self.model == 'demographics':
+            data = {'id': "%04d" % count, 'date': format_date_time(row[3]), 'mem_id': row[4], 'cin': row[5], 'dob': row[7], 'gender': get_gender(row[8]), 'last_name': row[9].title(), 'first_name': row[10].title(), 'middle_name': row[11].title(), 'email': row[12], 'opt_txt': row[14], 'opt_call': row[15], 'phone': {'home': row[16], 'work': row[17], 'cell': row[13]}, 'address': {'street': row[18], 'street2': row[19], 'city': row[20], 'state': row[21], 'zip': row[22]}}
+            return data
+
+
