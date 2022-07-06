@@ -1,9 +1,15 @@
 import csv
 from datetime import datetime
+import re
+from dateutil.parser import parse
 
 from app.core.config import Config
+from app.models.demographics import Demographics
+from app.models.enrollment import Enrollment
+from app.models.outreach import Outreach
 
-from app.utils.globals import CONTACT_ROLE, DISENROLLMENT_REASON
+from app.utils.globals import CONTACT_ROLE, DISENROLLMENT_REASON, ATTEMPT_RESULT, ATTEMPT_UNSUCCESFUL_DISPOSITION, \
+    ATTEMPT_SUCCESFUL_DISPOSITION
 
 cfg = Config()
 env = "P" if cfg.environment.lower() == 'production' else "T"
@@ -24,37 +30,37 @@ def get_type(file):
     return None
 
 
-def format_date_time(v) -> str:
+def format_date_time(v, t):
     try:
-        formatted = (datetime.strptime(v.replace('/', '-'),
-                                       '%Y-%m-%d %H:%M:%S')).strftime('%m-%d-%Y %H:%M:%S')
+        date = parse(v)
+        if t == 'date':
+            return date.strftime('%m-%d-%Y')
+        elif t == 'time':
+            return date.strftime('%H:%M:%S')
+        elif t == 'datetime':
+            return date.strftime('%m-%d-%Y %H:%M:%S')
     except ValueError:
-        formatted = (datetime.strptime(v.replace('/', '-'),
-                                       '%Y-%m-%d %H:%M')).strftime('%m-%d-%Y %H:%M:%S')
-    return formatted
-
-
-def format_date(v):
-    if v:
-        return datetime.strptime(v, '%Y-%m-%d').strftime('%m-%d-%Y')
-    return None
+        return None
 
 
 def get_gender(v):
     v = v.upper()
     if v[0] == 'M' or v[0] == 'F':
         return v[0]
-    return None
+    return "U"
 
 
 def yes_no(v):
-    return 1 if v.lower() == 'yes' or v == 1 else 0
+    if isinstance(v, str):
+        return 1 if v.lower() == 'yes' or v == '1' else 0
+    return 1 if v == 1 else 0
 
 
-def get_index(v, lst):
-    if v.lower() in lst.lower():
-        return lst.index(v.lower())
-    return None
+def get_index(v, lst) -> int:
+    for val in lst:
+        if v.lower() == val.lower():
+            return lst.index(val) + 1
+    return 0
 
 
 def get_key(v, dct):
@@ -67,23 +73,28 @@ def get_key(v, dct):
 def build_udfs(row, pre):
     count = 1
     udfs = []
-    for i in range((len(row) - pre) // 2):
-        code = row[pre + (1 * i)]
-        desc = row[pre + (2 * i)]
-        if code and desc:
-            udfs.append({f'udf_{count}': {'code': code, 'desc': desc}})
+    for i in range(pre, len(row), 2):
+        code = row[i]
+        desc = row[i + 1]
+        # if code and desc:
+        udfs.append({f'udf_{count}': {'code': row[i], 'desc': row[i + 1]}})
+        count += 1
     return udfs
 
 
 class GetCSV:
     def __init__(self, file):
         self.file = file
+        self.error_headers = []
         self.headers = []
         self.rows = []
+        self.good = []
+        self.bad = []
         self.csv_type = get_type(file)
         self.filename = ''
         self.model = ''
         self.process()
+        self.build_txt_row()
 
     def process(self):
         if self.csv_type:
@@ -91,16 +102,28 @@ class GetCSV:
             with open(self.file, 'r') as f:
                 reader = csv.reader(f, delimiter=',')
                 self.headers = next(reader)
+                self.error_headers = [h for h in self.headers]
+                self.error_headers.append('Error')
                 for i in self.headers:
                     j = self.headers.index(i)
                     self.headers[j] = j
                 self.rows = [row for row in reader]
-            self.model = self.csv_type.split('_')[-1]
+            self.model = self.csv_type.split('_')[-1].lower()
 
-    def build_txt_row(self, row, count):
-        data = {}
-        if self.model == 'demographics':
-            data = {'id': "%04d" % count, 'date': format_date_time(row[3]), 'mem_id': row[4], 'cin': row[5], 'dob': row[7], 'gender': get_gender(row[8]), 'last_name': row[9].title(), 'first_name': row[10].title(), 'middle_name': row[11].title(), 'email': row[12], 'opt_txt': row[14], 'opt_call': row[15], 'phone': {'home': row[16], 'work': row[17], 'cell': row[13]}, 'address': {'street': row[18], 'street2': row[19], 'city': row[20], 'state': row[21], 'zip': row[22]}}
-            return data
-
+    def build_txt_row(self):
+        id_index = 1
+        for row in self.rows:
+            if row[0]:
+                try:
+                    if self.model == 'demographic':
+                        self.good.append(Demographics(**{'filename': self.file.split('\\')[-1],'row_id': self.rows.index(row),'id': "%04d" % id_index,'date': format_date_time(row[3], 'datetime'),'mem_id': row[4].upper(),'cin': row[5].upper(),'dob': format_date_time(row[7], 'date'),'gender': get_gender(row[8]),'last_name': row[9].title(),'first_name': row[10].title(),'middle_name': row[11].title(),'email': row[12],'opt_txt': yes_no(row[14]),'opt_call': yes_no(row[15]),'phone': {'home': re.sub('\D', '', row[16]),'work': re.sub('\D', '', row[17]),'cell': re.sub('\D', '', row[13])},'address': {'street': row[18],'street2': row[19],'city': row[20],'state': row[21],'zip': row[22]}}))
+                    elif self.model == 'enrollment':
+                        self.good.append(Enrollment(**{'id': "%04d" % id_index,'date': format_date_time(row[3], 'datetime'),'mem_id': row[4].upper(),'cin': row[5].upper(),'next_visit': yes_no(row[7]),'next_visit_date': format_date_time(row[8], 'date'),'role': get_index(row[9], CONTACT_ROLE),'role_other': row[10],'contact_date': format_date_time(row[11], 'date'),'effective_date': format_date_time(row[11], 'date'),'term_date': format_date_time(row[12], 'date'),'enrollment_flag': yes_no(row[14]),'disenrollment_reason': row[13],'udf': build_udfs(row, 15)}))
+                    elif self.model == 'outreach':
+                        self.good.append(Outreach(**{'id': "%04d" % id_index,'date': format_date_time(row[1], 'datetime'),'mem_id': row[2].upper(),'cin': row[3].upper(),'rescheduled': yes_no(row[5]),'cancelled': yes_no(row[6]),'appointment_date': format_date_time(row[7] + ' ' + row[8], 'datetime'),'attempt_time': format_date_time(row[9] + ' ' + row[10], 'datetime'),'attempt_result': get_index(row[11], ATTEMPT_RESULT),'unsuccessful': get_index(row[12], ATTEMPT_UNSUCCESFUL_DISPOSITION),'successful': get_index(row[13], ATTEMPT_SUCCESFUL_DISPOSITION),'udf': build_udfs(row, 14)}))
+                    id_index += 1
+                except Exception as e:
+                    print(e)
+                    row.append(str(e).split('\n')[-1].split(' (')[0])
+                    self.bad.append(row)
 

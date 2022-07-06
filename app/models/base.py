@@ -6,13 +6,16 @@ from typing import Optional, Dict, List
 
 
 class TxtRow(BaseModel):
-    id: int = 0
+    filename: str
+    row_id: int
+    id: str
     date: str = datetime.strftime(datetime.now(), '%m-%d-%Y %H:%M:%S')
     void: int = 0
     mem_id: str
     cin: str
     tin: str = '956001629'
     npi: int = 1437825213
+    program: str = 'CSS'
 
     @validator('mem_id')
     def validate_mem_id(cls, v):
@@ -34,7 +37,7 @@ class TxtRow(BaseModel):
 
 
 class TxtRowUDF(TxtRow):
-    udf: Optional[List[Dict]] = []
+    udf: Optional[List[dict]] = []
 
     @validator('udf')
     def validate_udf(cls, v):
@@ -42,9 +45,9 @@ class TxtRowUDF(TxtRow):
         if not v:
             raise ValueError('UDF is required')
         for i in range(len(v)):
-            if v[i]['code'] and not v[i]['desc']:
+            if v[i][f'udf_{i + 1}']['code'] and not v[i][f'udf_{i + 1}']['desc']:
                 bad_udf.append("UDF %d has code but no description" % (i + 1))
-            if not v[i]['code'] and v[i]['desc']:
+            if not v[i][f'udf_{i + 1}']['code'] and v[i][f'udf_{i + 1}']['desc']:
                 bad_udf.append("UDF %d has description but no code" % (i + 1))
         if bad_udf:
             raise ValueError(', '.join(bad_udf))

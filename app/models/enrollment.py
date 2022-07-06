@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+import json
 
 from pydantic import validator
 
@@ -17,36 +18,47 @@ def get_role_other(role):
     return None
 
 
-class EnrollmentCSV(object):
-    def __init__(self):
-        # TODO: Implement CSV Model
-        pass
-
-
 class Enrollment(TxtRowUDF):
     next_visit: int = 0
-    next_visit_date: Optional[datetime.date] = None
+    next_visit_date: Optional[str] = ''
     role: int = 5
-    role_other:  Optional[str] = None
-    contact_date: datetime.date
-    effective_date: datetime.date
-    term_date: Optional[datetime.date] = None
+    role_other:  Optional[str] = ''
+    contact_date: str
+    effective_date: str
+    term_date: Optional[str] = ''
     enrollment_flag: int = 1
-    disenrollment_reason: Optional[str] =  None
+    disenrollment_reason: Optional[str] = ''
 
+    class Config:
+        validate_assignment = True
 
     @validator('role_other')
-    def validate_role_other(cls, v):
-        if cls.role == 5:
+    def validate_role_other(cls, v, values):
+        if values['role'] == 5:
             if not v:
                 raise ValueError('Role Other is required')
             return v
         return None
 
     @validator('disenrollment_reason')
-    def validate_disenrollment_reason(cls, v):
-        if cls.enrollment_flag == 0:
+    def validate_disenrollment_reason(cls, v, values):
+        if values['enrollment_flag'] == 0:
             if not v:
                 raise ValueError('Disenrollment Reason is required')
             return v
         return None
+
+    def write_row(self):
+        row = f"{self.id}|{self.date}|{self.void}|{self.mem_id}|{self.cin}|" \
+              f"{self.next_visit}|{self.next_visit_date}|{self.role}|{self.role_other}|{self.contact_date}|" \
+              f"{self.effective_date}|{self.term_date}|{self.enrollment_flag}|{self.disenrollment_reason}|" \
+              f"{self.tin}|{self.npi}|{self.program}"
+        for i in range(len(self.udf)):
+            row += f"|{self.udf[i][f'udf_{i + 1}']['code']}|{self.udf[i][f'udf_{i + 1}']['desc']}"
+        return row.replace('None', '')
+
+    def __str__(self):
+        return json.dumps(self.__dict__)
+
+    def __repr__(self):
+        return str(self)
