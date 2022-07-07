@@ -42,7 +42,7 @@ def format_date_time(v, t):
         elif t == 'datetime':
             return date.strftime('%m-%d-%Y %H:%M:%S')
     except ValueError:
-        return None
+        return ''
 
 
 def get_gender(v):
@@ -120,7 +120,9 @@ class GetCSV:
                     self.headers[j] = j
                 self.rows = [row for row in reader]
             self.model = self.csv_type.split('_')[-1].lower()
-
+            for row in self.rows:
+                for i in range(len(row)):
+                    row[i] = row[i].strip()
 
     def build_txt_row(self):
         id_index = 1

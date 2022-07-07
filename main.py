@@ -55,7 +55,6 @@ if not os.path.exists(os.getcwd() + '\\logs'):
 
 
 def process(event, file):
-    print(event)
     process_logger = logging.getLogger()
     process_logger.info("--------------------------------------------------------------------------------------------")
     process_logger.info(f'Found new file: {file}. Starting TXT conversion.')
