@@ -100,6 +100,7 @@ class GetCSV:
         self.csv_type = get_type(file)
         self.filename = ''
         self.model = ''
+        self.has_error = False
         self.process()
         self.build_txt_row()
 
@@ -109,18 +110,24 @@ class GetCSV:
             with open(self.file, 'r') as f:
                 reader = csv.reader(f, delimiter=',')
                 self.headers = next(reader)
+                if self.headers[-1] == 'Error':
+                    self.has_error = True
                 self.error_headers = [h for h in self.headers]
-                self.error_headers.append('Error')
+                if self.error_headers[-1] != 'Error':
+                    self.error_headers.append('Error')
                 for i in self.headers:
                     j = self.headers.index(i)
                     self.headers[j] = j
                 self.rows = [row for row in reader]
             self.model = self.csv_type.split('_')[-1].lower()
 
+
     def build_txt_row(self):
         id_index = 1
         logger = logging.getLogger(self.model.title())
         for row in self.rows:
+            if self.has_error:
+                row.pop()
             if row[0]:
                 try:
                     if self.model == 'demographic':
@@ -132,7 +139,7 @@ class GetCSV:
                     id_index += 1
                 except Exception as e:
                     logger.error(e)
-                    row.append(str(e).split('\n')[-1].split(' (')[0])
+                    row.append(str(e).split(' :: ')[-1])
                     self.bad.append(row)
         logger.info(f'Found {len(self.good)} good rows and {len(self.bad)} bad rows.')
 

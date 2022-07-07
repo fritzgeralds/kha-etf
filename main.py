@@ -48,6 +48,8 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 if not os.path.exists(input_dir + '\\processed'):
     os.makedirs(input_dir + '\\processed')
+if not os.path.exists(input_dir + '\\bad'):
+    os.makedirs(input_dir + '\\bad')
 if not os.path.exists(os.getcwd() + '\\logs'):
     os.makedirs(os.getcwd() + '\\logs')
 
@@ -66,7 +68,7 @@ def process(event, file):
                 for row in csv.good:
                     f.write(row.write_row() + '\n')
         if len(csv.bad) > 0:
-            with open('BAD_ROWS_' + csv.filename.replace('.txt', '.csv'), 'w') as f:
+            with open('.\\bad\\BAD_ROWS_' + csv.filename.replace('.txt', '.csv'), 'w') as f:
                 f.write(','.join(csv.error_headers) + '\n')
                 for row in csv.bad:
                     f.write(','.join(row) + '\n')
@@ -95,9 +97,8 @@ class MyHandler(PatternMatchingEventHandler):
     patterns = [pattern]
 
     def on_created(self, event):
-        if not event.src_path.split('\\')[-1].startswith('ABAD_'):
-            sleep(1)
-            process(event, event.src_path)
+        sleep(1)
+        process(event, event.src_path)
 
 
 if __name__ == '__main__':
