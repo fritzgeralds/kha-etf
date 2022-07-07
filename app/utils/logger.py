@@ -9,7 +9,6 @@ config = Config()
 
 
 class ColorFormatter(logging.Formatter):
-
     grey = "\x1b[38;20m"
     green = "\x1b[32;1m"
     yellow = "\x1b[33;20m"

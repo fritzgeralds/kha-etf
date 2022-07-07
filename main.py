@@ -9,8 +9,8 @@ from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
 from app.core.config import Config
-from app.utils.logger import get_logger
 from app.utils.helpers import GetCSV
+from app.utils.logger import get_logger
 
 cfg = Config()
 env = "P" if cfg.environment.lower() == 'production' else "T"
@@ -21,7 +21,6 @@ pattern = ''
 debug = False
 timeout = 0
 recursive = False
-
 
 parser = argparse.ArgumentParser(description='ETF Watchdog')
 parser.add_argument('-i', '--input', help='Directory to watch for new files. Default is current directory.',

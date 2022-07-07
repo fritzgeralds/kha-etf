@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Optional
 
 from pydantic import validator
@@ -6,7 +7,6 @@ from pydantic import validator
 from app.models.base import TxtRowUDF
 from app.models.error import Error
 
-import logging
 logger = logging.getLogger(__name__.split('.')[-1])
 
 
@@ -40,8 +40,8 @@ class Outreach(TxtRowUDF):
 
     def write_row(self):
         row = f"{self.id}|{self.date}|{self.void}|{self.mem_id}|{self.cin}|{self.rescheduled}|" \
-                   f"{self.cancelled}|{self.appointment_date}|{self.attempt_time}|{self.attempt_result}|" \
-                   f"{self.unsuccessful}|{self.successful}|{self.tin}|{self.npi}|{self.program}"
+              f"{self.cancelled}|{self.appointment_date}|{self.attempt_time}|{self.attempt_result}|" \
+              f"{self.unsuccessful}|{self.successful}|{self.tin}|{self.npi}|{self.program}"
         for i in range(len(self.udf)):
             row += f"|{self.udf[i][f'udf_{i + 1}']['code']}|{self.udf[i][f'udf_{i + 1}']['desc']}"
         return row.replace('None', '')

@@ -1,11 +1,12 @@
+import logging
 import re
 from datetime import datetime
 from typing import Optional, List
 
 from pydantic import BaseModel, validator
+
 from app.models.error import Error
 
-import logging
 logger = logging.getLogger(__name__.split('.')[-1])
 
 
