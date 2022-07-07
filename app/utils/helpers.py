@@ -1,15 +1,19 @@
 import csv
-from datetime import datetime
 import re
+import string
+import sys
+from datetime import datetime
+
 from dateutil.parser import parse
 
 from app.core.config import Config
 from app.models.demographics import Demographics
 from app.models.enrollment import Enrollment
 from app.models.outreach import Outreach
-
 from app.utils.globals import CONTACT_ROLE, DISENROLLMENT_REASON, ATTEMPT_RESULT, ATTEMPT_UNSUCCESFUL_DISPOSITION, \
     ATTEMPT_SUCCESFUL_DISPOSITION
+
+import logging
 
 cfg = Config()
 env = "P" if cfg.environment.lower() == 'production' else "T"
@@ -70,13 +74,18 @@ def get_key(v, dct):
     return None
 
 
+def get_disenrollment_key(v, dct):
+    for key, val in dct.items():
+        if v.lower().translate({ord(c): None for c in string.whitespace}) == \
+                val.lower().translate({ord(c): None for c in string.whitespace}):
+            return key
+    return None
+
+
 def build_udfs(row, pre):
     count = 1
     udfs = []
     for i in range(pre, len(row), 2):
-        code = row[i]
-        desc = row[i + 1]
-        # if code and desc:
         udfs.append({f'udf_{count}': {'code': row[i], 'desc': row[i + 1]}})
         count += 1
     return udfs
@@ -112,18 +121,20 @@ class GetCSV:
 
     def build_txt_row(self):
         id_index = 1
+        logger = logging.getLogger(self.model.title())
         for row in self.rows:
             if row[0]:
                 try:
                     if self.model == 'demographic':
-                        self.good.append(Demographics(**{'filename': self.file.split('\\')[-1],'row_id': self.rows.index(row),'id': "%04d" % id_index,'date': format_date_time(row[3], 'datetime'),'mem_id': row[4].upper(),'cin': row[5].upper(),'dob': format_date_time(row[7], 'date'),'gender': get_gender(row[8]),'last_name': row[9].title(),'first_name': row[10].title(),'middle_name': row[11].title(),'email': row[12],'opt_txt': yes_no(row[14]),'opt_call': yes_no(row[15]),'phone': {'home': re.sub('\D', '', row[16]),'work': re.sub('\D', '', row[17]),'cell': re.sub('\D', '', row[13])},'address': {'street': row[18],'street2': row[19],'city': row[20],'state': row[21],'zip': row[22]}}))
+                        self.good.append(Demographics(**{'filename': self.file.split('\\')[-1],'row_id': self.rows.index(row) + 1,'id': "%04d" % id_index,'date': format_date_time(row[3], 'datetime'),'mem_id': row[4].upper(),'cin': row[5].upper(),'dob': format_date_time(row[7], 'date'),'gender': get_gender(row[8]),'last_name': row[9].title(),'first_name': row[10].title(),'middle_name': row[11].title(),'email': row[12],'opt_txt': yes_no(row[14]),'opt_call': yes_no(row[15]),'phone': {'home': re.sub('\D', '', row[16]),'work': re.sub('\D', '', row[17]),'cell': re.sub('\D', '', row[13])},'address': {'street': row[18],'street2': row[19],'city': row[20],'state': row[21],'zip': row[22]}}))
                     elif self.model == 'enrollment':
-                        self.good.append(Enrollment(**{'id': "%04d" % id_index,'date': format_date_time(row[3], 'datetime'),'mem_id': row[4].upper(),'cin': row[5].upper(),'next_visit': yes_no(row[7]),'next_visit_date': format_date_time(row[8], 'date'),'role': get_index(row[9], CONTACT_ROLE),'role_other': row[10],'contact_date': format_date_time(row[11], 'date'),'effective_date': format_date_time(row[11], 'date'),'term_date': format_date_time(row[12], 'date'),'enrollment_flag': yes_no(row[14]),'disenrollment_reason': row[13],'udf': build_udfs(row, 15)}))
+                        self.good.append(Enrollment(**{'filename': self.file.split('\\')[-1],'row_id': self.rows.index(row) + 1,'id': "%04d" % id_index,'date': format_date_time(row[3], 'datetime'),'mem_id': row[4].upper(),'cin': row[5].upper(),'next_visit': yes_no(row[7]),'next_visit_date': format_date_time(row[8], 'date'),'role': get_index(row[9], CONTACT_ROLE),'role_other': row[10],'contact_date': format_date_time(row[11], 'date'),'effective_date': format_date_time(row[11], 'date'),'term_date': format_date_time(row[12], 'date'),'enrollment_flag': yes_no(row[14]),'disenrollment_reason': get_disenrollment_key(row[13], DISENROLLMENT_REASON),'udf': build_udfs(row, 15)}))
                     elif self.model == 'outreach':
-                        self.good.append(Outreach(**{'id': "%04d" % id_index,'date': format_date_time(row[1], 'datetime'),'mem_id': row[2].upper(),'cin': row[3].upper(),'rescheduled': yes_no(row[5]),'cancelled': yes_no(row[6]),'appointment_date': format_date_time(row[7] + ' ' + row[8], 'datetime'),'attempt_time': format_date_time(row[9] + ' ' + row[10], 'datetime'),'attempt_result': get_index(row[11], ATTEMPT_RESULT),'unsuccessful': get_index(row[12], ATTEMPT_UNSUCCESFUL_DISPOSITION),'successful': get_index(row[13], ATTEMPT_SUCCESFUL_DISPOSITION),'udf': build_udfs(row, 14)}))
+                        self.good.append(Outreach(**{'filename': self.file.split('\\')[-1],'row_id': self.rows.index(row) + 1,'id': "%04d" % id_index,'date': format_date_time(row[1], 'datetime'),'mem_id': row[2].upper(),'cin': row[3].upper(),'rescheduled': yes_no(row[5]),'cancelled': yes_no(row[6]),'appointment_date': format_date_time(row[7] + ' ' + row[8], 'datetime'),'attempt_time': format_date_time(row[9] + ' ' + row[10], 'datetime'),'attempt_result': get_index(row[11], ATTEMPT_RESULT),'unsuccessful': get_index(row[12], ATTEMPT_UNSUCCESFUL_DISPOSITION),'successful': get_index(row[13], ATTEMPT_SUCCESFUL_DISPOSITION),'udf': build_udfs(row, 14)}))
                     id_index += 1
                 except Exception as e:
-                    print(e)
+                    logger.error(e)
                     row.append(str(e).split('\n')[-1].split(' (')[0])
                     self.bad.append(row)
+        logger.info(f'Found {len(self.good)} good rows and {len(self.bad)} bad rows.')
 

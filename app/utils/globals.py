@@ -9,15 +9,16 @@ CONTACT_ROLE = [
 DISENROLLMENT_REASON = {
     'WM': 'Member is well-managed and not in need of services',
     'DP': 'Member declined to participate',
-    'UE': 'unable to engage the Member',
-    'UBE': 'unsafe behavior or environment',
+    'UE': 'Unable to engage the Member',
+    'UBE': 'Unsafe behavior or environment',
     'EXP': 'Member is deceased',
     'NE': 'Member is not enrolled in Medi-Cal at MCP',
     'OH': 'Member’s Medi-Cal eligibility is on hold or termed',
     'CAP': 'Provider does not have capacity for new Members',
     'ERR': 'Member information is incorrect',
-    'OTH': 'other reason  as further specified',
-    'SC': 'Successfully Completed'
+    'OTH': 'Other reason as further specified',
+    'SC': 'Successfully Completed',
+    'DNC': 'Data not collected'
 }
 
 ATTEMPT_RESULT = [

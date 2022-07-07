@@ -1,10 +1,13 @@
-from datetime import datetime
-from typing import Optional
 import json
+from typing import Optional
 
 from pydantic import validator
 
 from app.models.base import TxtRowUDF
+from app.models.error import Error
+
+import logging
+logger = logging.getLogger(__name__.split('.')[-1])
 
 
 def get_role():
@@ -36,7 +39,7 @@ class Enrollment(TxtRowUDF):
     def validate_role_other(cls, v, values):
         if values['role'] == 5:
             if not v:
-                raise ValueError('Role Other is required')
+                raise Error(message=f"{values['filename']} :: Row: {values['row_id']} - Role Other is required")
             return v
         return None
 
@@ -44,7 +47,7 @@ class Enrollment(TxtRowUDF):
     def validate_disenrollment_reason(cls, v, values):
         if values['enrollment_flag'] == 0:
             if not v:
-                raise ValueError('Disenrollment Reason is required')
+                raise Error(message=f"{values['filename']} :: Row: {values['row_id']} - Disenrollment Reason is required")
             return v
         return None
 

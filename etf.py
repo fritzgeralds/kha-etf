@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-from datetime import datetime
-import sys
-from time import sleep
-from watchdog.observers import Observer
-from watchdog.events import PatternMatchingEventHandler
 import argparse
 import os
 import shutil
-from app.utils.helpers import get_type
-from app.models import GetCSV, GetType
+import sys
+from datetime import datetime
+from time import sleep
+
+from watchdog.events import PatternMatchingEventHandler
+from watchdog.observers import Observer
+
 from app.core.config import Config
+from app.models import GetCSV
+from app.utils.helpers import get_type
+
 # from mailer import sendmail ## for future failure alert email
 
 

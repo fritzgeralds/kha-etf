@@ -1,10 +1,11 @@
 import os
 import smtplib
 from email import encoders
-from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from os.path import join, dirname
+
 from dotenv import load_dotenv
 
 

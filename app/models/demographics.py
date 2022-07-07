@@ -7,6 +7,9 @@ from pydantic import validator
 from app.models.base import TxtRow
 from app.models.error import Error
 
+import logging
+logger = logging.getLogger(__name__.split('.')[-1])
+
 
 class Demographics(TxtRow):
 
@@ -28,10 +31,10 @@ class Demographics(TxtRow):
         validate_assignment = True
 
     @validator('email')
-    def validate_email(cls, v):
+    def validate_email(cls, v, values):
         if v:
             if not re.fullmatch(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])", v):
-                raise Error(message='Invalid Email')
+                raise Error(message=f"{values['filename']} :: Row: {values['row_id']} - Invalid Email")
         return v
 
     @validator('address')
@@ -39,18 +42,18 @@ class Demographics(TxtRow):
         if any(v.values()):
             for key, value in v.items():
                 if key != 'street2' and not value:
-                    raise Error(message='Row: {} - Invalid Address: {} is required'.format(values['row_id'], key.title()))
+                    raise Error(message=f"{values['filename']} :: Row: {values['row_id']} - Invalid Address: {key.title()} is required")
         address = [v['street'], v['city'], v['state'], v['zip']]
         if not all(address):
             return {'street': '601 24th St', 'street2': '', 'city': 'Bakersfield', 'state': 'CA', 'zip': '93301'}
         return v
 
     @validator('dob')
-    def validate_dob(cls, v):
+    def validate_dob(cls, v, values):
         if not v:
-            raise Error(message='DOB is required')
+            raise Error(message=f"{values['filename']} :: Row: {values['row_id']} - DOB is required")
         if not re.match(r'^\d{2}-\d{2}-\d{4}$', v):
-            raise Error(message='Invalid DOB')
+            raise Error(message=f"{values['filename']} :: Row: {values['row_id']} - DOB is invalid")
         return v
 
     def write_row(self):

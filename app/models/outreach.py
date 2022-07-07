@@ -4,6 +4,10 @@ from typing import Optional
 from pydantic import validator
 
 from app.models.base import TxtRowUDF
+from app.models.error import Error
+
+import logging
+logger = logging.getLogger(__name__.split('.')[-1])
 
 
 class Outreach(TxtRowUDF):
@@ -22,7 +26,7 @@ class Outreach(TxtRowUDF):
     def validate_unsuccessful(cls, v, values):
         if values['attempt_res'] == 2:
             if not v:
-                raise ValueError('Unsuccessful is required')
+                raise Error(message=f"{values['filename']} :: Row: {values['row_id']} - Unsuccessful is required")
             return v
         return None
 
@@ -30,7 +34,7 @@ class Outreach(TxtRowUDF):
     def validate_successful(cls, v, values):
         if values['attempt_res'] == 1:
             if not v:
-                raise ValueError('Successful is required')
+                raise Error(message=f"{values['filename']} :: Row: {values['row_id']} - Successful is required")
             return v
         return None
 
