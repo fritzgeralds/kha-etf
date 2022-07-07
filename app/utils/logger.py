@@ -2,14 +2,13 @@ import logging
 import os
 import sys
 from logging.handlers import TimedRotatingFileHandler
-import coloredlogs
 
 from app.core.config import Config
 
 config = Config()
 
 
-class CustomFormatter(logging.Formatter):
+class ColorFormatter(logging.Formatter):
 
     grey = "\x1b[38;20m"
     green = "\x1b[32;1m"
@@ -19,7 +18,7 @@ class CustomFormatter(logging.Formatter):
     reset = "\x1b[0m"
     format = "%(message)s"
 
-    FORMATS = {
+    LEVELS = {
         logging.DEBUG: green + format + reset,
         logging.INFO: grey + format + reset,
         logging.WARNING: yellow + format + reset,
@@ -28,7 +27,7 @@ class CustomFormatter(logging.Formatter):
     }
 
     def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
+        log_fmt = self.LEVELS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
@@ -46,8 +45,7 @@ def get_logger(level=None):
     formatter = logging.Formatter(fmt, datefmt='%Y-%m-%d %H:%M:%S')
     handler.setFormatter(formatter)
     console = logging.StreamHandler(sys.stdout)
-    # console.setFormatter(logging.Formatter('%(message)s'))
-    console.setFormatter(CustomFormatter())
+    console.setFormatter(ColorFormatter())
     logger.addHandler(handler)
     logger.addHandler(console)
     return logger

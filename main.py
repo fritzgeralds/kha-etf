@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 import argparse
-import contextlib
 import logging
 import os
-import shutil
 import sys
 from time import sleep
 
@@ -11,21 +9,26 @@ from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
 from app.core.config import Config
-from app.core.logger import get_logger
+from app.utils.logger import get_logger
 from app.utils.helpers import GetCSV
-
-# from mailer import sendmail ## for future failure alert email
-
 
 cfg = Config()
 env = "P" if cfg.environment.lower() == 'production' else "T"
 
+input_dir = ''
+output_dir = ''
+pattern = ''
+debug = False
+timeout = 0
+recursive = False
+
+
 parser = argparse.ArgumentParser(description='ETF Watchdog')
 parser.add_argument('-i', '--input', help='Directory to watch for new files. Default is current directory.',
-                    required=False, type=str, default=os.getcwd(), dest='indir', action='store', nargs='?',
+                    required=False, type=str, default=os.getcwd(), dest='input_dir', action='store', nargs='?',
                     const=os.getcwd(), metavar='WATCH_DIR')
 parser.add_argument('-o', '--output', help='Directory to save converted files to. Default is current directory.',
-                    required=False, type=str, default=os.getcwd(), dest='outdir', action='store', nargs='?',
+                    required=False, type=str, default=os.getcwd(), dest='output_dir', action='store', nargs='?',
                     const=os.getcwd(), metavar='SAVE_DIR')
 parser.add_argument('-p', '--pattern', help='Pattern to match. Default is "*.CSV".', required=False, type=str,
                     dest='pattern', default='*.csv')
@@ -41,18 +44,19 @@ args = parser.parse_args()
 for arg in args.__dict__.keys():
     globals()[arg] = args.__dict__[arg]
 
-if not os.path.exists(outdir):
-    os.makedirs(outdir)
-if not os.path.exists(indir + '\\processed'):
-    os.makedirs(indir + '\\processed')
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+if not os.path.exists(input_dir + '\\processed'):
+    os.makedirs(input_dir + '\\processed')
 if not os.path.exists(os.getcwd() + '\\logs'):
     os.makedirs(os.getcwd() + '\\logs')
 
 
 def process(event, file):
-    logger = logging.getLogger()
-    logger.info("-----------------------------------------------------------------------------------------------------")
-    logger.info(f'Found new file: {file}. Starting TXT conversion.')
+    print(event)
+    process_logger = logging.getLogger()
+    process_logger.info("--------------------------------------------------------------------------------------------")
+    process_logger.info(f'Found new file: {file}. Starting TXT conversion.')
     sys.stdout.write('\n')
     file_name = file.split('\\')[-1]
     try:
@@ -66,22 +70,25 @@ def process(event, file):
                 f.write(','.join(csv.error_headers) + '\n')
                 for row in csv.bad:
                     f.write(','.join(row) + '\n')
-            logger = logging.getLogger(csv.model.title())
+            process_logger = logging.getLogger(csv.model.title())
             sys.stdout.write('\n')
-            logger.warning(f'Failed to convert {len(csv.bad)} rows. Saving bad rows to'
-                           f' {"BAD_ROWS_" + csv.filename.replace(".txt", ".csv")}')
-        logger = logging.getLogger()
-        logger.info(f'Successfully converted {len(csv.good)} rows.')
+            process_logger.warning(
+                f'Failed to convert {len(csv.bad)} rows. '
+                f'Saving bad rows to {"BAD_ROWS_" + csv.filename.replace(".txt", ".csv")}'
+            )
+        process_logger = logging.getLogger()
+        process_logger.info(f'Successfully converted {len(csv.good)} rows.')
         sys.stdout.write('\n')
-        logger.info(f'Moving {file} to {indir}\\processed.')
-        rename = indir + '\\processed\\' + file_name
+        process_logger.info(f'Moving {file} to {input_dir}\\processed.')
+        rename = input_dir + '\\processed\\' + file_name
         copy = 1
         while os.path.exists(rename):
-            rename = indir + '\\processed\\' + file_name.split('.')[0] + '_' + str(copy) + '.' + file_name.split('.')[1]
+            rename = input_dir + '\\processed\\' + \
+                     file_name.split('.')[0] + '_' + str(copy) + '.' + file_name.split('.')[1]
             copy += 1
         os.replace(file, rename)
     except Exception as e:
-        logger.error(f'Error converting {file} to TXT format. Error: {e}')
+        process_logger.error(f'Error converting {file} to TXT format. Error: {e}')
 
 
 class MyHandler(PatternMatchingEventHandler):
@@ -94,19 +101,19 @@ class MyHandler(PatternMatchingEventHandler):
 
 
 if __name__ == '__main__':
-    level = os.getenv('LOG_LEVEL') or debug
+    level = os.getenv('LOG_LEVEL').upper() or debug
     logger = get_logger(level=level)
 
     logger.info("Starting Watchdog Server...")
-    logger.info(" - Watching directory: " + indir)
-    logger.info(" - Saving TXT files to: " + outdir)
+    logger.info(" - Watching directory: " + input_dir)
+    logger.info(" - Saving TXT files to: " + output_dir)
     logger.info(" - Pattern: " + pattern)
     logger.info(" - Timeout: " + str(timeout))
     logger.info(" - Recursive: " + str(recursive))
 
     event_handler = MyHandler()
     observer = Observer()
-    observer.schedule(event_handler, indir, recursive=recursive)
+    observer.schedule(event_handler, input_dir, recursive=recursive)
     observer.start()
     try:
         while True:

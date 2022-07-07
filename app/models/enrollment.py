@@ -10,11 +10,6 @@ import logging
 logger = logging.getLogger(__name__.split('.')[-1])
 
 
-def get_role():
-    # TODO - Implement get_role
-    pass
-
-
 def get_role_other(role):
     if role == 5:
         return 'Other'

@@ -1,7 +1,7 @@
 import csv
+import logging
 import re
 import string
-import sys
 from datetime import datetime
 
 from dateutil.parser import parse
@@ -10,10 +10,8 @@ from app.core.config import Config
 from app.models.demographics import Demographics
 from app.models.enrollment import Enrollment
 from app.models.outreach import Outreach
-from app.utils.globals import CONTACT_ROLE, DISENROLLMENT_REASON, ATTEMPT_RESULT, ATTEMPT_UNSUCCESFUL_DISPOSITION, \
+from app.utils.constants import CONTACT_ROLE, DISENROLLMENT_REASON, ATTEMPT_RESULT, ATTEMPT_UNSUCCESFUL_DISPOSITION, \
     ATTEMPT_SUCCESFUL_DISPOSITION
-
-import logging
 
 cfg = Config()
 env = "P" if cfg.environment.lower() == 'production' else "T"
