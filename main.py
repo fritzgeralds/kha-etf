@@ -66,7 +66,7 @@ def process(event, file):
                 for row in csv.good:
                     f.write(row.write_row() + '\n')
         if len(csv.bad) > 0:
-            with open(INPUT_DIR + '/bad/BAD_ROWS_' + csv.filename.replace('.txt', '.csv'), 'w') as f:
+            with open(BAD_DIR + '/BAD_ROWS_' + csv.filename.replace('.txt', '.csv'), 'w') as f:
                 f.write(','.join(csv.error_headers) + '\n')
                 for row in csv.bad:
                     f.write(','.join(row) + '\n')
@@ -83,8 +83,7 @@ def process(event, file):
         rename = INPUT_DIR + '/processed/' + file_name
         copy = 1
         while os.path.exists(rename):
-            rename = INPUT_DIR + '/processed/' + \
-                     file_name.split('.')[0] + '_' + str(copy) + '.' + file_name.split('.')[1]
+            rename = PROCESSED_DIR + file_name.split('.')[0] + '_' + str(copy) + '.' + file_name.split('.')[1]
             copy += 1
         os.replace(file, rename)
     except Exception as e:
@@ -116,9 +115,6 @@ if __name__ == '__main__':
     observer.start()
     try:
         while True:
-            if os.listdir(BAD_DIR):
-                os.renames(BAD_DIR, BAD_DIR + ' (' + str(len(os.listdir(INPUT_DIR + '/bad'))) + ')')
-                BAD_DIR = BAD_DIR + ' (' + str(len(os.listdir(INPUT_DIR + '/bad'))) + ')'
             sleep(TIMEOUT)
     except KeyboardInterrupt:
         logger.info("Stopping Watchdog Server...")
