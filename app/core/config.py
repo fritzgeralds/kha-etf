@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -9,7 +10,7 @@ class Config(object):
         load_dotenv()
         self.environment = os.getenv("ENVIRONMENT")
         self.log_file = os.getenv("LOG_FILE") or \
-                        os.path.dirname(os.path.realpath(__file__)) + "/logs/log_" + \
+                        os.path.dirname(os.path.realpath(sys.argv[0])) + "/logs/log_" + \
                         datetime.now().strftime("%Y-%m-%d") + ".log"
         self.log_level = os.getenv("LOG_LEVEL") or "INFO"
         self.log_format = os.getenv("LOG_FORMAT") or "[%(asctime)s] :: %(name)s :: %(levelname)s - %(message)s"
