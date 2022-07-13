@@ -34,7 +34,7 @@ class ColorFormatter(logging.Formatter):
 
 def get_logger(level=None):
     if not os.path.exists(os.path.dirname(config.log_file)):
-        os.makedirs(os.path.dirname(config.log_file))
+        os.makedirs(os.path.dirname(config.log_file), exist_ok=True)
     if level == 'DEBUG':
         level = logging.DEBUG
     fmt = config.log_format

@@ -1,13 +1,13 @@
 import json
+import logging
 import re
-from typing import Optional, Any
+from typing import Optional
 
 from pydantic import validator
 
 from app.models.base import TxtRow
 from app.models.error import Error
 
-import logging
 logger = logging.getLogger(__name__.split('.')[-1])
 
 

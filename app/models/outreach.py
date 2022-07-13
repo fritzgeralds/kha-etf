@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Optional
 
 from pydantic import validator
@@ -6,7 +7,6 @@ from pydantic import validator
 from app.models.base import TxtRowUDF
 from app.models.error import Error
 
-import logging
 logger = logging.getLogger(__name__.split('.')[-1])
 
 
