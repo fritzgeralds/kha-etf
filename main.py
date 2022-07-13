@@ -118,9 +118,6 @@ if __name__ == '__main__':
     observer.start()
     try:
         while True:
-            if os.listdir(BAD_DIR):
-                os.renames(BAD_DIR, BAD_DIR + ' (' + str(len(os.listdir(INPUT_DIR + '/bad'))) + ')')
-                BAD_DIR = BAD_DIR + ' (' + str(len(os.listdir(INPUT_DIR + '/bad'))) + ')'
             sleep(TIMEOUT)
     except KeyboardInterrupt:
         logger.info("Stopping Watchdog Server...")
