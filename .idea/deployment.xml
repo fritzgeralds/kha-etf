@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="Home" createEmptyFolders="true" uploadOnCheckin="af2d95ad-520b-4dc2-bd2c-a14a3f25bd4c" remoteFilesAllowedToDisappearOnAutoupload="false" autoUploadExternalChanges="true">
+  <component name="PublishConfigData" autoUpload="Always" serverName="Home" createEmptyFolders="true" uploadOnCheckin="a9bcb61b-6b26-4e97-beb6-2d8c84d27906" remoteFilesAllowedToDisappearOnAutoupload="false" autoUploadExternalChanges="true" showEqualInSync="true">
     <serverData>
       <paths name="Home">
         <serverdata>
           <mappings>
-            <mapping deploy="kha-etf" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/kha-etf" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
